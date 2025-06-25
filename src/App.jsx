@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Form from './components/Form';
 import Roadmap from './components/Roadmap';
 import { Upload, X, File, Download } from 'lucide-react';
@@ -16,7 +16,7 @@ function App() {
   // State for roadmap data - starts with sample data
   const [roadmapData, setRoadmapData] = useState([
     {
-      date: '2025-06-17',
+      date: '2025-06-25',
       task: 'Write value proposition: What transformation does the reader get?',
       dailyStartTime: '10:00',
       dailyHours: 6,
@@ -38,12 +38,26 @@ function App() {
     },
     {
       date: '2025-06-20',
-      task: 'Write draft copy for each section (keep it concise + benefit-focused).',
+     task: 'Write draft copy for each section (keep it concise + benefit-focused).',
       dailyStartTime: '10:00',
       dailyHours: 6,
       motivation: 'Get an ice cream'
     }
   ]);
+ 
+  
+   const [roadmapToday, setRoadmapToday] = useState([]);
+
+  // Get today's date in the correct format
+  const today = new Date().toISOString().split('T')[0];
+
+  // Add this useEffect to update with real today's data
+  useEffect(() => {
+  const today = new Date().toISOString().split('T')[0];
+  const todayTasks = roadmapData.filter(item => item.date === today);
+  setRoadmapToday(todayTasks); // always update, even if empty
+}, [roadmapData]);
+ 
 
   // Function to parse ICS content and convert to roadmap data format
   const parseIcsToRoadmapData = (icsContent) => {
@@ -466,10 +480,12 @@ function App() {
 
   return (
     <div className="app-container">
+      <div id="part1" style={{backgroundColor:"none", display:"block"}}>
         <h2>1 Chatbot</h2>
       <div id="form-all-id">
         <Form onPromptChange={setGesamtPrompt} />
       </div>
+      
       <br/>
       {gesamtPrompt && (
         <div style={{
@@ -652,7 +668,31 @@ function App() {
           </div>
         </div>
       </div>
-          
+      {/* END OF PART 1 /////////////////////////////////////////////////////////////// */}
+          </div>
+
+        <div id="part2" style={{display:"block"}}>
+         {/*  
+           <Roadmap
+            roadmapData={roadmapToday}
+           /> 
+           */}
+         
+
+           
+          {roadmapToday.length > 0 ? (
+          <Roadmap roadmapData={roadmapToday} />
+          ) : (
+          <div style={{
+          padding: '20px',
+          textAlign: 'center',
+          color: '#666',
+          fontStyle: 'italic'
+          }}>
+          No tasks scheduled for today ! ({today})
+       </div>
+)}
+        </div>
        <h2>2 Projektplan</h2>
        <div style={{
          padding: '10px',
