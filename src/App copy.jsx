@@ -706,9 +706,14 @@ let part3 = params.get('part3');
 
 
         
-       
-       <div style={{ display:part3 }}>
-        <h2>2 Projektplan</h2>
+       <h2>2 Projektplan</h2>
+       <div style={{
+         padding: '10px',
+         backgroundColor: '#e8f4fd',
+         borderRadius: '8px',
+         marginBottom: '20px',
+         fontSize: '14px'
+       }}>
          <strong>ℹ️ Info:</strong> Der Projektplan wird automatisch aktualisiert, wenn die KI .ics-Kalender-Daten erstellt. 
          Aktuell werden <strong>{roadmapData.length} Termine</strong> angezeigt.
      
