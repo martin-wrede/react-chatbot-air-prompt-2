@@ -152,7 +152,7 @@ Alter
                 <label>
                     <b>5. Wann ist der Projekt Start?</b><br />
                     <em>(Format: YYYY-MM-DD, z.B. 2025-06-22)</em><br />
-                    <input type="date" name="date" required />
+                    <input type="date" name="startDate" required />
                 </label>
                 <br /><br />
 

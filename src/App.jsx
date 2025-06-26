@@ -506,7 +506,7 @@ let part3 = params.get('part3');
           maxHeight: '100px',
           overflow: 'auto'
         }}>
-          <strong>Aktiver Prompt:</strong> {gesamtPrompt.substring(0, 200)}...
+          <strong>Aktiver Prompt:</strong>  {gesamtPrompt}
         </div>
       )}
       <br/>
@@ -639,7 +639,7 @@ let part3 = params.get('part3');
                       onClick={() => deleteFile(file.id)}
                       className="delete-button"
                       title="Datei löschen"
-                    >
+                    >x
                       <X size={12} />
                     </button>
                   </div>
