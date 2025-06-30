@@ -506,7 +506,7 @@ let part3 = params.get('part3');
           maxHeight: '100px',
           overflow: 'auto'
         }}>
-          <strong>Aktiver Prompt:</strong> {gesamtPrompt.substring(0, 200)}...
+          <strong>Aktiver Prompt:</strong>  {gesamtPrompt}
         </div>
       )}
       <br/>
@@ -639,7 +639,7 @@ let part3 = params.get('part3');
                       onClick={() => deleteFile(file.id)}
                       className="delete-button"
                       title="Datei löschen"
-                    >
+                    >x
                       <X size={12} />
                     </button>
                   </div>
@@ -706,14 +706,9 @@ let part3 = params.get('part3');
 
 
         
-       <h2>2 Projektplan</h2>
-       <div style={{
-         padding: '10px',
-         backgroundColor: '#e8f4fd',
-         borderRadius: '8px',
-         marginBottom: '20px',
-         fontSize: '14px'
-       }}>
+       
+       <div id="part3" style={{ display:part3 }}>
+        <h2>2 Projektplan</h2>
          <strong>ℹ️ Info:</strong> Der Projektplan wird automatisch aktualisiert, wenn die KI .ics-Kalender-Daten erstellt. 
          Aktuell werden <strong>{roadmapData.length} Termine</strong> angezeigt.
      

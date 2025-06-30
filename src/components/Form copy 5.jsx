@@ -21,15 +21,15 @@ export default function Form(props){
 
     const [gesamtPrompt, setGesamtPrompt] = useState("")
 
-    // Work days configuration - now uses data from JSON
+    // Work days configuration
     const weekDays = [
-        { id: 'monday', label: data.workDays?.monday || 'Montag', short: data.workDaysShort?.monday || 'Mo' },
-        { id: 'tuesday', label: data.workDays?.tuesday || 'Dienstag', short: data.workDaysShort?.tuesday || 'Di' },
-        { id: 'wednesday', label: data.workDays?.wednesday || 'Mittwoch', short: data.workDaysShort?.wednesday || 'Mi' },
-        { id: 'thursday', label: data.workDays?.thursday || 'Donnerstag', short: data.workDaysShort?.thursday || 'Do' },
-        { id: 'friday', label: data.workDays?.friday || 'Freitag', short: data.workDaysShort?.friday || 'Fr' },
-        { id: 'saturday', label: data.workDays?.saturday || 'Samstag', short: data.workDaysShort?.saturday || 'Sa' },
-        { id: 'sunday', label: data.workDays?.sunday || 'Sonntag', short: data.workDaysShort?.sunday || 'So' }
+        { id: 'monday', label: 'Montag', short: 'Mo' },
+        { id: 'tuesday', label: 'Dienstag', short: 'Di' },
+        { id: 'wednesday', label: 'Mittwoch', short: 'Mi' },
+        { id: 'thursday', label: 'Donnerstag', short: 'Do' },
+        { id: 'friday', label: 'Freitag', short: 'Fr' },
+        { id: 'saturday', label: 'Samstag', short: 'Sa' },
+        { id: 'sunday', label: 'Sonntag', short: 'So' }
     ];
 
     const [workDays, setWorkDays] = useState(['monday', 'tuesday', 'wednesday', 'thursday', 'friday']);
@@ -182,7 +182,7 @@ export default function Form(props){
                         ))}
                     </div>
                     <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
-                        {data.workDaysSelected || 'Selected'}: {workDays.length} {workDays.length === 1 ? (data.workDaysSingular || 'Tag') : (data.workDaysPlural || 'Tage')}
+                        Selected: {workDays.length} day{workDays.length !== 1 ? 's' : ''}
                     </small>
                 </label>
                 <br /><br />
