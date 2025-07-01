@@ -1,22 +1,24 @@
 {
-  "personalDataLabel": "Persönliche Daten: (nicht ausfüllen, fließen aktuell nicht in den Prompt mit ein)",
-  "ageLabel": "Alter",
-  "genderLabel": "Geschlecht",
-  "countryLabel": "Aktueller Wohnort / Land:",
-  "question1": "1. Welches Haupt-Problem willst du lösen?",
-  "question2": "2. Welche Lösung siehst Du dafür?",
-  "question3": "3. In welchem Zeitraum willst Du das Ergebnis fertig haben - in Monaten?",
-  "question4": "4. Welche Art von Ergebnis erwartest Du?",
-  "question4Hint": "(z.B. Prototyp, fertiges Endprodukt)",
-  "question5": "5. Wann ist der Projekt Start?",
-  "question5Hint": "(Format: YYYY-MM-DD, z.B. 2025-06-22)",
-  "question6": "6. Wann fängst Du täglich an zu arbeiten?",
-  "question6Hint": "(Format: HH:MM, z.B. 09:00)",
-  "question7": "7. Wieviel Stunden wirst Du täglich an dem Projekt arbeiten?",
-  "question8": "8. An welchen Tagen will Du an dem Projekt arbeiten?",
-  "question9": "9. Wie würdest Du Deine Nische oder Industrie bezeichnen?",
-  "question9Hint": "(z.B. Online, Warenverkauf, Dienstleistung)",
-  "submitButton": "Projektdaten speichern",
+  "personalDataLabel": "Personal Data: (do not fill out, currently not included in the prompt)",
+  "ageLabel": "Age",
+  "genderLabel": "Gender",
+  "countryLabel": "Land:",
+  "question1": "Was ist Ihr Problem oder Ziel?",
+  "question2": "Welche Lösung stellen Sie sich vor?",
+  "question3": "In wie vielen Tagen möchten Sie das Ziel erreichen?",
+  "question4": "Was ist das gewünschte Ergebnis?",
+  "question4Hint": "Beschreiben Sie das konkrete Endergebnis",
+  "question5": "Wann möchten Sie beginnen?",
+  "question5Hint": "Wählen Sie Ihr Startdatum",
+  "question6": "Um welche Uhrzeit möchten Sie täglich beginnen?",
+  "question6Hint": "Ihre bevorzugte Startzeit",
+  "question7": "Wie viele Stunden pro Tag möchten Sie daran arbeiten?",
+  "question8": "An welchen Tagen der Woche möchten Sie arbeiten?",
+  "question9": "In welcher Branche/Bereich arbeiten Sie?",
+  "question9Hint": "z.B. Marketing, Technologie, Gesundheitswesen",
+  
+  "submitButton": "Roadmap erstellen",
+  
   "workDays": {
     "monday": "Montag",
     "tuesday": "Dienstag", 
@@ -26,6 +28,7 @@
     "saturday": "Samstag",
     "sunday": "Sonntag"
   },
+  
   "workDaysShort": {
     "monday": "Mo",
     "tuesday": "Di",
@@ -35,19 +38,161 @@
     "saturday": "Sa",
     "sunday": "So"
   },
+  
   "workDaysSelected": "Ausgewählt",
   "workDaysSingular": "Tag",
   "workDaysPlural": "Tage",
-  "aiRolePrompt": "Du bist ein erfahrener Projektmanager.\n\nDeine Aufgabe besteht aus zwei Schritten:\n\n1. Du analysierst das gegebene Ziel, das der Benutzer dir nennt, und gibst eine vollständige Liste aller notwendigen Aufgaben aus, die erledigt werden müssen, um dieses Ziel zu erreichen.\n\n2. Danach wandelst du diese Aufgaben in ein Google-Kalender-kompatibles Format (.ics) um. Für jeden Task legst du fest:\n– Den Starttermin (beginnend am nächsten Werktag, also ohne Samstag/Sonntag),\n– Eine Anfangszeit (z. B. 09:00 Uhr),\n– Eine Dauer (z. B. 2 Stunden).\n\nDu erzeugst daraus einen vollständigen .ics-Kalendertext, der vom Benutzer in Google Calendar importiert werden kann.\n\nAntwortformat:\nZuerst gibst du die Aufgabenliste in Klartext aus (stichpunktartig oder nummeriert).\nDann folgt der Kalender-Inhalt im .ics-Format, eingerahmt von den Tags ```ics und ```.\n\nBeispiel:\n```ics\nBEGIN:VCALENDAR\n...\nEND:VCALENDAR\n```\n\nBeginne erst mit deiner Analyse, wenn der Benutzer sein Ziel, Lösung und Zeitraum eingegeben hat.",
+  
+  "aiRolePrompt": "Du bist ein erfahrener AI-Coach und Mentor. Erstelle einen detaillierten, personalisierten Roadmap-Plan basierend auf den folgenden Informationen:",
+  
   "promptTemplate": {
-    "problem": "1. Mein Problem, was ich lösen möchte ist: ",
-    "solution": " // 2. Die Lösung, die ich aktuell sehe ist: ",
-    "result": " // 3. Ich sehe das Ergebnis in der Form von: ",
-    "period": " // 4. Der Zeitraum den ich einplane ist in Monaten: ",
-    "startDate": " // 5. Der Projektstart ist am: ",
-    "dailyStartTime": " // 6. Tägliche Anfangszeit : ",
-    "dailyHours": " // 7. Tägliche Arbeitszeit: ",   
-    "workDays": " // 8. Wöchentliche Arbeitstage: ",
-    "industry": " // 9. Die Industrie oder Nische ist: "
-  }
+    "problem": "\n\nProblem/Ziel: ",
+    "solution": "\nLösungsansatz: ",
+    "result": "\nGewünschtes Ergebnis: ",
+    "period": "\nZeitraum (Tage): ",
+    "startDate": "\nStartdatum: ",
+    "dailyStartTime": "\nTägliche Startzeit: ",
+    "dailyHours": "\nStunden pro Tag: ",
+    "workDays": "\nArbeitstage: ",
+    "industry": "\nBranche/Bereich: "
+  },
+  
+  "roadmapLabels": {
+    "title": "AI Coach Roadmap",
+    "subtitle": "Ihre personalisierte Reise zum Erfolg",
+    "headerIcon": "📅",
+    "exportButton": "In Kalender exportieren (.ics)",
+    "exportIcon": "⬇️",
+    "icsFileName": "ai-coach-roadmap.ics",
+    
+    "completedIcon": "✅",
+    "incompleteIcon": "⭕",
+    
+    "startTimeIcon": "🕘",
+    "startTimeLabel": "STARTZEIT",
+    "durationIcon": "⏱️", 
+    "durationLabel": "DAUER",
+    "endTimeIcon": "🕕",
+    "endTimeLabel": "ENDZEIT",
+    "hoursShort": "h",
+    "hoursLabel": "Stunden",
+    
+    "taskIcon": "🎯",
+    "todaysTask": "Heutige Aufgabe",
+    "taskLabel": "Aufgabe",
+    
+    "motivationIcon": "💖",
+    "motivationLabel": "Motivation",
+    
+    "calendarIcon": "🔗",
+    "addToGoogleCalendar": "Zu Google Kalender hinzufügen",
+    "calendarEventPrefix": "AI Coach",
+    "calendarLocation": "Persönliche Entwicklung",
+    
+    "progressTitle": "Fortschritts-Übersicht",
+    "ofLabel": "von",
+    "tasksCompleted": "Aufgaben abgeschlossen",
+    
+    "totalHours": "Gesamtstunden",
+    "completedHours": "Abgeschlossene Stunden", 
+    "avgHoursPerDay": "Ø Stunden/Tag",
+    "remainingHours": "Verbleibende Stunden",
+    
+    "infoTitle": "Erweiterte Zeiterfassung",
+    "infoText": "Die Roadmap enthält jetzt detailliertes Zeitmanagement mit Startzeiten, Dauer und Endzeiten. Kalender-Exporte enthalten präzise Terminplanungsinformationen."
+  },
+  
+  "sampleRoadmapData": [
+    {
+      "date": "2025-07-02",
+      "task": "Wertversprechen schreiben: Welche Transformation erhält der Leser?",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Getränke mit Freunden"
+    },
+    {
+      "date": "2025-07-03",
+      "task": "3 Konkurrenz-Landingpages recherchieren und notieren, was funktioniert.",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Einige Freunde anrufen"
+    },
+    {
+      "date": "2025-07-04",
+      "task": "Brainstorming für Seitenbereiche: Hero, Über uns, Buchvorschau, Testimonials, Kauf-CTA.",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Den Film über Steve Jobs schauen"
+    },
+    {
+      "date": "2025-07-05",
+      "task": "Entwurf für jeden Bereich schreiben (prägnant + nutzenorientiert).",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Ein Eis essen gehen"
+    },
+    {
+      "date": "2025-07-06",
+      "task": "Wireframe oder grobes Layout der Seite erstellen.",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Abends ins Kino gehen"
+    },
+    {
+      "date": "2025-07-07",
+      "task": "Design-Mockup erstellen oder Template auswählen.",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Neues Restaurant ausprobieren"
+    },
+    {
+      "date": "2025-07-08",
+      "task": "Landingpage technisch umsetzen (HTML/CSS oder Website-Builder).",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Entspannten Spaziergang machen"
+    },
+    {
+      "date": "2025-07-09",
+      "task": "Inhalte einpflegen und erste Tests durchführen.",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Lieblingsserie schauen"
+    },
+    {
+      "date": "2025-07-10",
+      "task": "Mobile Responsivität prüfen und optimieren.",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Picknick im Park"
+    },
+    {
+      "date": "2025-07-11",
+      "task": "SEO-Grundlagen implementieren (Meta-Tags, Alt-Texte, etc.).",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Videospiel-Abend mit Freunden"
+    },
+    {
+      "date": "2025-07-12",
+      "task": "Analytics einrichten (Google Analytics, Tracking-Pixel).",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Massage buchen"
+    },
+    {
+      "date": "2025-07-13",
+      "task": "Finale Tests und Korrekturen durchführen.",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Lieblingsmusik hören und tanzen"
+    },
+    {
+      "date": "2025-07-14",
+      "task": "Landingpage live schalten und erste Marketing-Maßnahmen planen.",
+      "dailyStartTime": "10:00",
+      "dailyHours": 6,
+      "motivation": "Erfolg mit einem besonderen Dinner feiern"
+    }
+  ]
 }

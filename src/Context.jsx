@@ -1,3 +1,4 @@
+// iframe Context.jsx
 import React, { useEffect, useState } from 'react';
 
 const Context = React.createContext();
@@ -23,7 +24,8 @@ function ContextProvider({ children }) {
 
   useEffect(() => {
     const getData = async () => {
-      const url = `/react-chat-prompt-2/data-${language}-ai.json`;
+   //   const url = `/react-chat-prompt-2/data-de-ai.json`;
+     const url = `/react-chat-prompt-2/data-${language}-ai.json`;
 
       try {
         const response = await fetch(url);

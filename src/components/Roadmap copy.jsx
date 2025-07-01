@@ -1,5 +1,6 @@
-import React, { useState, useContext } from 'react';
-import { Context } from '../Context';
+// this the old file without JSON database
+import React, { useState } from 'react';
+import { Context } from '../Context';     
 
 // CSS styles as JavaScript object
 const styles = {
@@ -259,18 +260,43 @@ const styles = {
   }
 };
 
-// Helper function to format date based on language
-const formatDate = (dateStr, language = 'de') => {
+// Sample data with time information
+const sampleRoadmapData = [
+  {
+    date: '2025-06-17',
+    task: 'Write value proposition: What transformation does the reader get?',
+    dailyStartTime: '10:00',
+    dailyHours: 6,
+    motivation: 'Exchange of drinks'
+  },
+  {
+    date: '2025-06-18',
+    task: 'Research 3 competitor landing pages and note what works.',
+    dailyStartTime: '10:00',
+    dailyHours: 6,
+    motivation: 'Call some friends'
+  },
+  {
+    date: '2025-06-19',
+    task: 'Brainstorm page sections: Hero, About, Book Preview, Testimonials, Buy CTA.',
+    dailyStartTime: '10:00',
+    dailyHours: 6,
+    motivation: 'Watch the movie about Steve Jobs'
+  },
+  {
+    date: '2025-06-20',
+    task: 'Write draft copy for each section (keep it concise + benefit-focused).',
+    dailyStartTime: '10:00',
+    dailyHours: 6,
+    motivation: 'Get an ice cream'
+  }
+];
+
+// Helper function to format date
+const formatDate = (dateStr) => {
   const date = new Date(dateStr);
-  
-  const daysDE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-  const daysEN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  
-  const monthsDE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-  const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  
-  const days = language === 'de' ? daysDE : daysEN;
-  const months = language === 'de' ? monthsDE : monthsEN;
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   
   return {
     dayName: days[date.getDay()],
@@ -291,7 +317,7 @@ const calculateEndTime = (startTime, hours) => {
 };
 
 // Helper function to generate ICS content with proper time handling
-const generateICS = (roadmapData, labels) => {
+const generateICS = (roadmapData) => {
   const icsHeader = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//AI Coach//Roadmap//EN
@@ -320,8 +346,8 @@ METHOD:PUBLISH`;
 UID:${Date.now()}-${Math.random().toString(36).substr(2, 9)}@aicoach.com
 DTSTART:${startDateStr}
 DTEND:${endDateStr}
-SUMMARY:${labels.calendarEventPrefix}: ${item.task}
-DESCRIPTION:${labels.taskLabel}: ${item.task}\\n\\n${labels.startTimeLabel}: ${item.dailyStartTime || '10:00'}\\n${labels.durationLabel}: ${item.dailyHours || 1} ${labels.hoursLabel}\\n\\n${labels.motivationLabel}: ${item.motivation}
+SUMMARY:AI Coach: ${item.task}
+DESCRIPTION:Task: ${item.task}\\n\\nStart Time: ${item.dailyStartTime || '10:00'}\\nDuration: ${item.dailyHours || 1} hours\\n\\nMotivation: ${item.motivation}
 CATEGORIES:AI Coach,Personal Development
 STATUS:CONFIRMED
 TRANSP:OPAQUE
@@ -332,13 +358,9 @@ END:VEVENT`;
 };
 
 // Main Roadmap Component
-export default function Roadmap({ roadmapData }) {
-  const { data } = useContext(Context);
+export default function Roadmap({ roadmapData = sampleRoadmapData }) {
   const [completedTasks, setCompletedTasks] = useState(new Set());
   const [hoveredButton, setHoveredButton] = useState(null);
-
-  // Use roadmapData from props or fallback to sample data from context
-  const currentRoadmapData = roadmapData || data.sampleRoadmapData || [];
 
   const toggleTaskComplete = (date) => {
     const newCompleted = new Set(completedTasks);
@@ -351,11 +373,11 @@ export default function Roadmap({ roadmapData }) {
   };
 
   const downloadICS = () => {
-    const icsContent = generateICS(currentRoadmapData, data.roadmapLabels);
+    const icsContent = generateICS(roadmapData);
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = data.roadmapLabels?.icsFileName || 'ai-coach-roadmap.ics';
+    link.download = 'ai-coach-roadmap.ics';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -379,34 +401,31 @@ export default function Roadmap({ roadmapData }) {
     
     const params = new URLSearchParams({
       action: 'TEMPLATE',
-      text: `${data.roadmapLabels?.calendarEventPrefix}: ${task.task}`,
+      text: `AI Coach: ${task.task}`,
       dates: `${startDateStr}/${endDateStr}`,
-      details: `${data.roadmapLabels?.taskLabel}: ${task.task}\n\n${data.roadmapLabels?.startTimeLabel}: ${task.dailyStartTime || '10:00'}\n${data.roadmapLabels?.durationLabel}: ${task.dailyHours || 1} ${data.roadmapLabels?.hoursLabel}\n\n${data.roadmapLabels?.motivationLabel}: ${task.motivation}`,
-      location: data.roadmapLabels?.calendarLocation || 'Personal Development'
+      details: `Task: ${task.task}\n\nStart Time: ${task.dailyStartTime || '10:00'}\nDuration: ${task.dailyHours || 1} hours\n\nMotivation: ${task.motivation}`,
+      location: 'Personal Development'
     });
     
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
 
   // Calculate statistics
-  const totalHours = currentRoadmapData.reduce((sum, item) => sum + (item.dailyHours || 0), 0);
-  const completedHours = currentRoadmapData
+  const totalHours = roadmapData.reduce((sum, item) => sum + (item.dailyHours || 0), 0);
+  const completedHours = roadmapData
     .filter(item => completedTasks.has(item.date))
     .reduce((sum, item) => sum + (item.dailyHours || 0), 0);
-  const avgHoursPerDay = currentRoadmapData.length > 0 ? totalHours / currentRoadmapData.length : 0;
-
-  // Get language from context or default to 'de'
-  const language = data.language || 'de';
+  const avgHoursPerDay = totalHours / roadmapData.length;
 
   return (
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
         <div style={styles.headerTitle}>
-          <span style={{ fontSize: '24px' }}>{data.roadmapLabels?.headerIcon || '📅'}</span>
-          <h1 style={styles.title}>{data.roadmapLabels?.title || 'AI Coach Roadmap'}</h1>
+          <span style={{ fontSize: '24px' }}>📅</span>
+          <h1 style={styles.title}>AI Coach Roadmap</h1>
         </div>
-        <p style={styles.subtitle}>{data.roadmapLabels?.subtitle || 'Your personalized journey to success'}</p>
+        <p style={styles.subtitle}>Your personalized journey to success</p>
         
         {/* Export Button */}
         <button
@@ -418,15 +437,15 @@ export default function Roadmap({ roadmapData }) {
           onMouseEnter={() => setHoveredButton('export')}
           onMouseLeave={() => setHoveredButton(null)}
         >
-          <span>{data.roadmapLabels?.exportIcon || '⬇️'}</span>
-          {data.roadmapLabels?.exportButton || 'Export to Calendar (.ics)'}
+          <span>⬇️</span>
+          Export to Calendar (.ics)
         </button>
       </div>
 
       {/* Calendar Grid */}
       <div style={styles.grid}>
-        {currentRoadmapData.map((item) => {
-          const dateInfo = formatDate(item.date, language);
+        {roadmapData.map((item) => {
+          const dateInfo = formatDate(item.date);
           const isCompleted = completedTasks.has(item.date);
           const endTime = calculateEndTime(item.dailyStartTime || '10:00', item.dailyHours || 1);
           
@@ -455,30 +474,30 @@ export default function Roadmap({ roadmapData }) {
                     ...(isCompleted ? styles.completeButtonActive : styles.completeButtonInactive)
                   }}
                 >
-                  {isCompleted ? (data.roadmapLabels?.completedIcon || '✅') : (data.roadmapLabels?.incompleteIcon || '⭕')}
+                  {isCompleted ? '✅' : '⭕'}
                 </button>
               </div>
 
               {/* Time Information */}
               <div style={styles.timeSection}>
                 <div style={styles.timeInfo}>
-                  <div style={styles.timeValue}>{data.roadmapLabels?.startTimeIcon || '🕘'} {item.dailyStartTime || '10:00'}</div>
-                  <div style={styles.timeLabel}>{data.roadmapLabels?.startTimeLabel || 'START TIME'}</div>
+                  <div style={styles.timeValue}>🕘 {item.dailyStartTime || '10:00'}</div>
+                  <div style={styles.timeLabel}>START TIME</div>
                 </div>
                 <div style={styles.timeInfo}>
-                  <div style={styles.timeValue}>{data.roadmapLabels?.durationIcon || '⏱️'} {item.dailyHours || 1}{data.roadmapLabels?.hoursShort || 'h'}</div>
-                  <div style={styles.timeLabel}>{data.roadmapLabels?.durationLabel || 'DURATION'}</div>
+                  <div style={styles.timeValue}>⏱️ {item.dailyHours || 1}h</div>
+                  <div style={styles.timeLabel}>DURATION</div>
                 </div>
                 <div style={styles.timeInfo}>
-                  <div style={styles.timeValue}>{data.roadmapLabels?.endTimeIcon || '🕕'} {endTime}</div>
-                  <div style={styles.timeLabel}>{data.roadmapLabels?.endTimeLabel || 'END TIME'}</div>
+                  <div style={styles.timeValue}>🕕 {endTime}</div>
+                  <div style={styles.timeLabel}>END TIME</div>
                 </div>
               </div>
 
               {/* Task */}
               <div style={styles.taskSection}>
                 <div style={styles.sectionTitle}>
-                  {data.roadmapLabels?.taskIcon || '🎯'} {data.roadmapLabels?.todaysTask || "Today's Task"}
+                  🎯 Today's Task
                 </div>
                 <p style={{
                   ...styles.taskText,
@@ -491,7 +510,7 @@ export default function Roadmap({ roadmapData }) {
               {/* Motivation */}
               <div style={styles.taskSection}>
                 <div style={styles.sectionTitle}>
-                  {data.roadmapLabels?.motivationIcon || '💖'} {data.roadmapLabels?.motivationLabel || 'Motivation'}
+                  💖 Motivation
                 </div>
                 <p style={styles.motivationText}>{item.motivation}</p>
               </div>
@@ -508,8 +527,8 @@ export default function Roadmap({ roadmapData }) {
                 onMouseEnter={() => setHoveredButton(`cal-${item.date}`)}
                 onMouseLeave={() => setHoveredButton(null)}
               >
-                <span>{data.roadmapLabels?.calendarIcon || '🔗'}</span>
-                {data.roadmapLabels?.addToGoogleCalendar || 'Add to Google Calendar'}
+                <span>🔗</span>
+                Add to Google Calendar
               </a>
             </div>
           );
@@ -518,48 +537,51 @@ export default function Roadmap({ roadmapData }) {
 
       {/* Progress Summary */}
       <div style={styles.progressContainer}>
-        <h2 style={styles.progressTitle}>{data.roadmapLabels?.progressTitle || 'Progress Summary'}</h2>
+        <h2 style={styles.progressTitle}>Progress Summary</h2>
         <div style={styles.progressBar}>
           <div style={styles.progressBarTrack}>
             <div 
               style={{
                 ...styles.progressBarFill,
-                width: `${currentRoadmapData.length > 0 ? (completedTasks.size / currentRoadmapData.length) * 100 : 0}%`
+                width: `${(completedTasks.size / roadmapData.length) * 100}%`
               }}
             ></div>
           </div>
           <span style={styles.progressText}>
-            {completedTasks.size} {data.roadmapLabels?.ofLabel || 'of'} {currentRoadmapData.length} {data.roadmapLabels?.tasksCompleted || 'tasks completed'}
+            {completedTasks.size} of {roadmapData.length} tasks completed
           </span>
         </div>
         
         {/* Time Statistics */}
         <div style={styles.timeStats}>
           <div style={styles.statCard}>
-            <div style={styles.statValue}>{totalHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div style={styles.statLabel}>{data.roadmapLabels?.totalHours || 'Total Hours'}</div>
+            <div style={styles.statValue}>{totalHours}h</div>
+            <div style={styles.statLabel}>Total Hours</div>
           </div>
           <div style={styles.statCard}>
-            <div style={styles.statValue}>{completedHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div style={styles.statLabel}>{data.roadmapLabels?.completedHours || 'Completed Hours'}</div>
+            <div style={styles.statValue}>{completedHours}h</div>
+            <div style={styles.statLabel}>Completed Hours</div>
           </div>
           <div style={styles.statCard}>
-            <div style={styles.statValue}>{avgHoursPerDay.toFixed(1)}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div style={styles.statLabel}>{data.roadmapLabels?.avgHoursPerDay || 'Avg Hours/Day'}</div>
+            <div style={styles.statValue}>{avgHoursPerDay.toFixed(1)}h</div>
+            <div style={styles.statLabel}>Avg Hours/Day</div>
           </div>
           <div style={styles.statCard}>
-            <div style={styles.statValue}>{totalHours - completedHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div style={styles.statLabel}>{data.roadmapLabels?.remainingHours || 'Remaining Hours'}</div>
+            <div style={styles.statValue}>{totalHours - completedHours}h</div>
+            <div style={styles.statLabel}>Remaining Hours</div>
           </div>
         </div>
       </div>
 
       {/* Info Box */}
       <div style={styles.infoBox}>
-        <h3 style={styles.infoTitle}>{data.roadmapLabels?.infoTitle || 'Enhanced Time Tracking'}</h3>
+        <h3 style={styles.infoTitle}>Enhanced Time Tracking</h3>
         <p style={styles.infoText}>
-          {data.roadmapLabels?.infoText || 'The roadmap now includes detailed time management with start times, duration, and end times. Calendar exports include precise scheduling information.'}
+          The roadmap now includes detailed time management with start times, duration, and end times. Calendar exports include precise scheduling information.
         </p>
+        <div style={styles.codeBlock}>
+         
+        </div>
       </div>
     </div>
   );

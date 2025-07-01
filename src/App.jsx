@@ -9,10 +9,8 @@ function App() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
-  
   const [gesamtPrompt, setGesamtPrompt] = useState("")
- 
-  
+
 // If you want to parse the URL of current page in browser:
 
 let params = new URLSearchParams(location.search);
@@ -26,31 +24,17 @@ let part3 = params.get('part3');
   const [roadmapData, setRoadmapData] = useState([
     {
       date: '2025-06-25',
-      task: 'Write value proposition: What transformation does the reader get?',
+      task: 'Schreibe Value Proposition: was bekommt der Users?',
       dailyStartTime: '10:00',
       dailyHours: 6,
-      motivation: 'Exchange of drinks'
+      motivation: 'Drinks mit Kollegen'
     },
     {
       date: '2025-06-18',
-      task: 'Research 3 competitor landing pages and note what works.',
+      task: 'Recherchiere 3 Landing Pages und schreib auf, was funktioniert.',
       dailyStartTime: '10:00',
       dailyHours: 6,
-      motivation: 'Call some friends'
-    },
-    {
-      date: '2025-06-19',
-      task: 'Brainstorm page sections: Hero, About, Book Preview, Testimonials, Buy CTA.',
-      dailyStartTime: '10:00',
-      dailyHours: 6,
-      motivation: 'Watch the movie about Steve Jobs'
-    },
-    {
-      date: '2025-06-20',
-     task: 'Write draft copy for each section (keep it concise + benefit-focused).',
-      dailyStartTime: '10:00',
-      dailyHours: 6,
-      motivation: 'Get an ice cream'
+      motivation: 'Freunde anrufen'
     }
   ]);
  
@@ -698,7 +682,7 @@ let part3 = params.get('part3');
           color: '#666',
           fontStyle: 'italic'
           }}>
-          No tasks scheduled for today ! ({today})
+          Keine Aufgaben für heute! ({today})
        </div>
 )}
         </div>
