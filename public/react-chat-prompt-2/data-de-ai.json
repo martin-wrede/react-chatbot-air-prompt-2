@@ -1,7 +1,7 @@
 {
-  "personalDataLabel": "Personal Data: (do not fill out, currently not included in the prompt)",
-  "ageLabel": "Age",
-  "genderLabel": "Gender",
+  "personalDataLabel": "Persönliche Daten: (nicht ausfüllen)",
+  "ageLabel": "Alter",
+  "genderLabel": "Geschlecht",
   "countryLabel": "Land:",
   "question1": "Was ist Ihr Problem oder Ziel?",
   "question2": "Welche Lösung stellen Sie sich vor?",
