@@ -62,7 +62,7 @@ BEGIN:VCALENDAR
 END:VCALENDAR
 \`\`\`
 
-Beginne erst mit deiner Analyse, wenn der Benutzer sein Ziel, Lösung und Zeitraum eingegeben hat.
+Beginne erst mit deiner Analyse, wenn der Benutzer dich im chat damit beauf.
 `;
 
 
