@@ -41,7 +41,7 @@ const calculateEndTime = (startTime, hours) => {
 // Helper function to generate ICS content with proper time handling
 const generateICS = (roadmapData, labels) => {
   const icsHeader = `BEGIN:VCALENDAR
-VERSION:2.0
+VE5RSION:2.0
 PRODID:-//AI Coach//Roadmap//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH`;
@@ -64,16 +64,31 @@ METHOD:PUBLISH`;
     const startDateStr = startDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     
+    // completion mw 2025-07-2
+   ///  const isCompleted = item.completed === true; // or use a Set/map if needed
+    
+    const isCompleted = completedTasks.has(task.date);
+const prefix = isCompleted ? '✅ ' : '';
+const label = isCompleted ? '[Completed] ' : '';
+
+// text:
+
+// details: `${label}${data.roadmapLabels?.taskLabel}: ${task.task}\n\n${data.roadmapLabels?.startTimeLabel}: ${task.dailyStartTime || '10:00'}\n${data.roadmapLabels?.durationLabel}: ${task.dailyHours || 1} ${data.roadmapLabels?.hoursLabel}\n\n${data.roadmapLabels?.motivationLabel}: ${task.motivation}`;
+
+    const summary = `${labels.calendarEventPrefix}: ${isCompleted ? '✅ ' : ''}${item.task}`;
+    const description = `${labels.taskLabel}: ${isCompleted ? '[Completed] ' : ''}${item.task}\\n\\n${labels.startTimeLabel}: ${item.dailyStartTime || '10:00'}\\n${labels.durationLabel}: ${item.dailyHours || 1} ${labels.hoursLabel}\\n\\n${labels.motivationLabel}: ${item.motivation}`;
+
     return `BEGIN:VEVENT
 UID:${Date.now()}-${Math.random().toString(36).substr(2, 9)}@aicoach.com
 DTSTART:${startDateStr}
 DTEND:${endDateStr}
-SUMMARY:${labels.calendarEventPrefix}: ${item.task}
-DESCRIPTION:${labels.taskLabel}: ${item.task}\\n\\n${labels.startTimeLabel}: ${item.dailyStartTime || '10:00'}\\n${labels.durationLabel}: ${item.dailyHours || 1} ${labels.hoursLabel}\\n\\n${labels.motivationLabel}: ${item.motivation}
+SUMMARY:${summary}
+DESCRIPTION:${description}
 CATEGORIES:AI Coach,Personal Development
 STATUS:CONFIRMED
 TRANSP:OPAQUE
-END:VEVENT`;
+END:VEVENT
+`;
   }).join('\n');
 
   return `${icsHeader}\n${events}\n${icsFooter}`;
@@ -86,7 +101,13 @@ export default function Roadmap({ roadmapData }) {
   const [hoveredButton, setHoveredButton] = useState(null);
 
   // Use roadmapData from props or fallback to sample data from context
-  const currentRoadmapData = roadmapData || data.sampleRoadmapData || [];
+  ///  const currentRoadmapData = roadmapData || data.sampleRoadmapData || [];
+
+  const currentRoadmapData = (roadmapData || data.sampleRoadmapData || []).map(item => ({
+  ...item,
+  completed: completedTasks.has(item.date),
+}));
+
 
   const toggleTaskComplete = (date) => {
     const newCompleted = new Set(completedTasks);
@@ -110,32 +131,39 @@ export default function Roadmap({ roadmapData }) {
   };
 
   const generateGoogleCalendarUrl = (task) => {
-    const date = new Date(task.date);
-    const [startHour, startMinute] = (task.dailyStartTime || '10:00').split(':').map(Number);
-    const duration = task.dailyHours || 1;
-    
-    // Set start time
-    const startDate = new Date(date);
-    startDate.setHours(startHour, startMinute, 0, 0);
-    
-    // Set end time
-    const endDate = new Date(startDate);
-    endDate.setHours(startDate.getHours() + duration);
-    
-    const startDateStr = startDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    
-    const params = new URLSearchParams({
-      action: 'TEMPLATE',
-      text: `${data.roadmapLabels?.calendarEventPrefix}: ${task.task}`,
-      dates: `${startDateStr}/${endDateStr}`,
-      details: `${data.roadmapLabels?.taskLabel}: ${task.task}\n\n${data.roadmapLabels?.startTimeLabel}: ${task.dailyStartTime || '10:00'}\n${data.roadmapLabels?.durationLabel}: ${task.dailyHours || 1} ${data.roadmapLabels?.hoursLabel}\n\n${data.roadmapLabels?.motivationLabel}: ${task.motivation}`,
-      location: data.roadmapLabels?.calendarLocation || 'Personal Development'
-    });
-    
-    return `https://calendar.google.com/calendar/render?${params.toString()}`;
-  };
+  const date = new Date(task.date);
+  const [startHour, startMinute] = (task.dailyStartTime || '10:00').split(':').map(Number);
+  const duration = task.dailyHours || 1;
 
+  // Set start and end time
+  const startDate = new Date(date);
+  startDate.setHours(startHour, startMinute, 0, 0);
+
+  const endDate = new Date(startDate);
+  endDate.setHours(startDate.getHours() + duration);
+
+  const startDateStr = startDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+  // ✅ Check if this task is marked as completed
+  const isCompleted = completedTasks.has(task.date);
+  const prefix = isCompleted ? '✅ ' : '';
+  const label = isCompleted ? '[Completed] ' : '';
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: `${prefix}${data.roadmapLabels?.calendarEventPrefix || ''}: ${task.task}`,
+    dates: `${startDateStr}/${endDateStr}`,
+    details: `${label}${data.roadmapLabels?.taskLabel}: ${task.task}\n\n${data.roadmapLabels?.startTimeLabel}: ${task.dailyStartTime || '10:00'}\n${data.roadmapLabels?.durationLabel}: ${task.dailyHours || 1} ${data.roadmapLabels?.hoursLabel}\n\n${data.roadmapLabels?.motivationLabel}: ${task.motivation}`,
+    location: isCompleted
+      ? `[Completed] ${data.roadmapLabels?.calendarLocation || 'Personal Development'}`
+      : data.roadmapLabels?.calendarLocation || 'Personal Development'
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+};
+
+  
   // Calculate statistics
   const totalHours = currentRoadmapData.reduce((sum, item) => sum + (item.dailyHours || 0), 0);
   const completedHours = currentRoadmapData
