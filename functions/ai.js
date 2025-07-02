@@ -132,12 +132,13 @@ WICHTIG: Der Benutzer hat ${files.length} Textdatei(en) hochgeladen. Diese Datei
         "Authorization": `Bearer ${env.VITE_APP_OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: chatMessages,
-        max_tokens: files.length > 0 ? 2000 : 1000, // More tokens when files are involved
-        temperature: 0.7,
-      }),
+    body: JSON.stringify({
+  model: "gpt-4-1106-preview", // ✅ Valid model name
+  messages: chatMessages,      // ✅ Should be an array of { role, content } objects
+  max_tokens: files.length > 0 ? 2000 : 1000, // ✅ Smart token allocation
+  temperature: 0.7,            // ✅ Good balance of creativity and coherence
+}),
+
     });
 
     if (!apiResponse.ok) {

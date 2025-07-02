@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Form from './components/Form';
 import Roadmap from './components/Roadmap';
+import { Context } from './Context';
 import { Upload, X, File, Download } from 'lucide-react';
 import './App.css';
 
@@ -11,13 +12,15 @@ function App() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [gesamtPrompt, setGesamtPrompt] = useState("")
 
+   const { data } = useContext(Context);
+ 
 // If you want to parse the URL of current page in browser:
-
 let params = new URLSearchParams(location.search);
 
 let part1 = params.get('part1');
 let part2 = params.get('part2');
 let part3 = params.get('part3');
+
  
 
 // State for roadmap data - starts with sample data
@@ -178,10 +181,10 @@ let part3 = params.get('part3');
             
             // If no specific motivation found, use a generic one
             if (!motivation && description.length > 10) {
-              motivation = 'Complete this important task!';
+              motivation = data?.chat_defaultMotivation || 'Complete this important task!';
             }
             
-            event.motivation = motivation || 'Stay focused and achieve your goals!';
+            event.motivation = motivation || (data?.chat_defaultMotivation || 'Stay focused and achieve your goals!');
           }
         });
         
@@ -190,7 +193,7 @@ let part3 = params.get('part3');
           // Set default values if missing
           if (!event.dailyStartTime) event.dailyStartTime = '09:00';
           if (!event.dailyHours) event.dailyHours = 2;
-          if (!event.motivation) event.motivation = 'Keep pushing towards your goal!';
+          if (!event.motivation) event.motivation = data?.chat_defaultMotivation || 'Keep pushing towards your goal!';
           
           events.push(event);
         }
@@ -208,7 +211,7 @@ let part3 = params.get('part3');
 
   // Helper function for formatting ICS dates
   const formatIcsDate = (icsDate) => {
-    if (!icsDate) return 'Unbekannt';
+    if (!icsDate) return data?.chat_unknownDate || 'Unbekannt';
     
     const year = icsDate.substring(0, 4);
     const month = icsDate.substring(4, 6);
@@ -249,11 +252,15 @@ let part3 = params.get('part3');
     });
     
     if (events.length > 0) {
-      return `ICS-Kalender mit ${events.length} Terminen:\n\n` + 
+      const calendarText = data?.chat_icsCalendarWith || 'ICS-Kalender mit';
+      const appointmentsText = data?.chat_appointments || 'Terminen';
+      const originalContentText = data?.chat_originalIcsContent || 'Original ICS-Inhalt';
+      
+      return `${calendarText} ${events.length} ${appointmentsText}:\n\n` + 
              events.map(event => 
                `- ${event.summary} (${formatIcsDate(event.start)})`
              ).join('\n') + 
-             `\n\nOriginal ICS-Inhalt:\n${icsText}`;
+             `\n\n${originalContentText}:\n${icsText}`;
     }
     
     return icsText;
@@ -319,9 +326,10 @@ let part3 = params.get('part3');
         
         // Add a success message to the chat
         setTimeout(() => {
+          const successMessage = data?.chat_autoImportSuccess || 'Automatisch {count} Termine in den Projektplan importiert! Scrolle nach unten, um den aktualisierten Plan zu sehen.';
           setMessages(prev => [...prev, {
             role: 'system',
-            content: `✅ Automatisch ${importedEvents} Termine in den Projektplan importiert! Scrolle nach unten, um den aktualisierten Plan zu sehen.`
+            content: `✅ ${successMessage.replace('{count}', importedEvents)}`
           }]);
         }, 1000);
       }
@@ -365,7 +373,8 @@ let part3 = params.get('part3');
           content = parseIcsContent(content);
         }
         else {
-          alert(`${file.name} ist kein unterstütztes Dateiformat. Nur .txt und .ics Dateien sind erlaubt.`);
+          const errorMessage = data?.chat_unsupportedFileFormat || '{filename} ist kein unterstütztes Dateiformat. Nur .txt und .ics Dateien sind erlaubt.';
+          alert(errorMessage.replace('{filename}', file.name));
           continue;
         }
 
@@ -381,7 +390,8 @@ let part3 = params.get('part3');
         setUploadedFiles(prev => [...prev, fileData]);
       } catch (error) {
         console.error('Error reading file:', error);
-        alert(`Fehler beim Lesen der Datei ${file.name}`);
+        const errorMessage = data?.chat_fileReadError || 'Fehler beim Lesen der Datei {filename}';
+        alert(errorMessage.replace('{filename}', file.name));
       }
     }
     
@@ -396,10 +406,11 @@ let part3 = params.get('part3');
     // Combine file content if available
     if (uploadedFiles.length > 0) {
       const fileContext = uploadedFiles.map(file =>
-        `[Datei: ${file.name} (${file.type})]\n${file.content}`
+        `[${data?.chat_fileLabel || 'Datei'}: ${file.name} (${file.type})]\n${file.content}`
       ).join('\n\n---\n\n');
 
-      messageContent = `${messageContent}\n\n[Hochgeladene Dateien:]\n${fileContext}`;
+      const uploadedFilesLabel = data?.chat_uploadedFilesLabel || 'Hochgeladene Dateien';
+      messageContent = `${messageContent}\n\n[${uploadedFilesLabel}:]\n${fileContext}`;
     }
 
     const userMessage = { role: 'user', content: messageContent };
@@ -425,8 +436,8 @@ let part3 = params.get('part3');
         }),
       });
 
-      const data = await response.json();
-      const aiContent = data.choices?.[0]?.message?.content || 'Keine Antwort generiert.';
+      const responseData = await response.json();
+      const aiContent = responseData.choices?.[0]?.message?.content || (data?.chat_noResponseGenerated || 'Keine Antwort generiert.');
       
       // Process the AI response for ICS content and auto-import
       const processedResponse = processAIResponse(aiContent);
@@ -445,7 +456,7 @@ let part3 = params.get('part3');
       console.error("Error sending message:", error);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Fehler bei der Verarbeitung.'
+        content: data?.chat_processingError || 'Fehler bei der Verarbeitung.'
       }]);
     } finally {
       setIsLoading(false);
@@ -474,7 +485,9 @@ let part3 = params.get('part3');
   return (
     <div className="app-container">
       <div id="part1" style={{backgroundColor:"white", display:part1}}>
-        <h2>1 Chatbot</h2>
+      
+          <h2>{data && data.app_Headline1}</h2>
+        
       <div id="form-all-id">
         <Form onPromptChange={setGesamtPrompt} />
       </div>
@@ -490,19 +503,21 @@ let part3 = params.get('part3');
           maxHeight: '100px',
           overflow: 'auto'
         }}>
-          <strong>Aktiver Prompt:</strong>  {gesamtPrompt}
+          <strong>{data?.chat_activePromptLabel || 'Aktiver Prompt'}:</strong> {gesamtPrompt}
         </div>
       )}
       <br/>
      
       {/* Chat Container All */}
       <div className="chat-container">
-        <h2>AI Chatbot / Download link</h2>
+    
+        
+          <h2>{data && data.app_Headline2}</h2>
         {/* Chat Messages Container */}
         <div className="chat-container">
           {messages.length === 0 ? (
             <div className="empty-chat">
-              Beginne eine Unterhaltung...
+              {data?.chat_startConversation || 'Beginne eine Unterhaltung...'}
             </div>
           ) : (
             messages.map((message, index) => (
@@ -514,8 +529,8 @@ let part3 = params.get('part3');
                 }`}
               >
                 <strong>
-                  {message.role === 'user' ? 'Du:' : 
-                   message.role === 'system' ? 'System:' : 'AI:'}
+                  {message.role === 'user' ? (data?.chat_youLabel || 'Du:') : 
+                   message.role === 'system' ? (data?.chat_systemLabel || 'System:') : (data?.chat_aiLabel || 'AI:')}
                 </strong>
                 <div className="message-content">
                   {message.content}
@@ -532,7 +547,7 @@ let part3 = params.get('part3');
                     fontSize: '12px',
                     fontWeight: '500'
                   }}>
-                    ✅ {message.importedEvents} Termine automatisch in den Projektplan importiert
+                    ✅ {(data?.chat_importedToRoadmap || '{count} Termine automatisch in den Projektplan importiert').replace('{count}', message.importedEvents)}
                   </div>
                 )}
                 
@@ -540,7 +555,7 @@ let part3 = params.get('part3');
                 {message.role === 'assistant' && message.downloadLinks && message.downloadLinks.length > 0 && (
                   <div className="ics-downloads">
                     <h4 style={{margin: '10px 0 5px 0', fontSize: '14px', color: '#666'}}>
-                      📅 Kalender-Dateien:
+                      📅 {data?.chat_calendarFilesLabel || 'Kalender-Dateien:'}
                     </h4>
                     {message.downloadLinks.map((link, linkIndex) => (
                       <button
@@ -576,7 +591,7 @@ let part3 = params.get('part3');
           
           {isLoading && (
             <div className="message message-loading">
-              AI tippt...
+              {data?.chat_aiTyping || 'AI tippt...'}
             </div>
           )}
         </div>
@@ -586,7 +601,7 @@ let part3 = params.get('part3');
           <div className="file-upload-header">
             <label className="upload-button">
               <Upload size={16} />
-              Text- und Kalender-Dateien hochladen
+              {data?.chat_uploadFilesLabel || 'Text- und Kalender-Dateien hochladen'}
               <input
                 type="file"
                 multiple
@@ -596,14 +611,14 @@ let part3 = params.get('part3');
               />
             </label>
             <span className="file-hint">
-              .txt und .ics Dateien erlaubt (ICS-Dateien werden automatisch importiert)
+              {data?.chat_fileHint || '.txt und .ics Dateien erlaubt (ICS-Dateien werden automatisch importiert)'}
             </span>
           </div>
 
           {uploadedFiles.length > 0 && (
             <div className="uploaded-files">
               <h4 className="files-title">
-                Hochgeladene Dateien ({uploadedFiles.length}):
+                {(data?.chat_uploadedFilesTitle || 'Hochgeladene Dateien ({count}):').replace('{count}', uploadedFiles.length)}
               </h4>
               <div className="files-list">
                 {uploadedFiles.map((file) => (
@@ -615,15 +630,15 @@ let part3 = params.get('part3');
                           {file.name} {file.type === 'calendar' && '📅'}
                         </div>
                         <div className="file-meta">
-                          {formatFileSize(file.size)} • {file.uploadedAt} • {file.type === 'calendar' ? 'Kalender' : 'Text'}
+                          {formatFileSize(file.size)} • {file.uploadedAt} • {file.type === 'calendar' ? (data?.chat_calendarType || 'Kalender') : (data?.chat_textType || 'Text')}
                         </div>
                       </div>
                     </div>
                     <button
                       onClick={() => deleteFile(file.id)}
                       className="delete-button"
-                      title="Datei löschen"
-                    >x
+                      title={data?.chat_deleteFileTooltip || 'Datei löschen'}
+                    >
                       <X size={12} />
                     </button>
                   </div>
@@ -638,12 +653,12 @@ let part3 = params.get('part3');
           {uploadedFiles.length > 0 && (
             <div className="attached-files-indicator">
               <File size={14} />
-              <span>{uploadedFiles.length} Datei(en) angehängt</span>
+              <span>{(data?.chat_filesAttached || '{count} Datei(en) angehängt').replace('{count}', uploadedFiles.length)}</span>
             </div>
           )}
           <div className="input-controls">
             <textarea
-              placeholder="Schreibe deine Nachricht..."
+              placeholder={data?.chat_messagePlaceholder || 'Schreibe deine Nachricht...'}
               value={inputMessage}
               onChange={e => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -656,7 +671,7 @@ let part3 = params.get('part3');
               disabled={isLoading || (!inputMessage.trim() && uploadedFiles.length === 0)}
               className={`send-button ${(isLoading || (!inputMessage.trim() && uploadedFiles.length === 0)) ? 'disabled' : ''}`}
             >
-              {isLoading ? 'Senden...' : 'Senden'}
+              {isLoading ? (data?.chat_sendingButton || 'Senden...') : (data?.chat_sendButton || 'Senden')}
             </button>
           </div>
         </div>
@@ -682,7 +697,7 @@ let part3 = params.get('part3');
           color: '#666',
           fontStyle: 'italic'
           }}>
-          Keine Aufgaben für heute! ({today})
+          {(data?.chat_noTasksToday || 'Keine Aufgaben für heute! ({today})').replace('{today}', today)}
        </div>
 )}
         </div>
@@ -692,10 +707,13 @@ let part3 = params.get('part3');
         
        
        <div id="part3" style={{ display:part3 }}>
-        <h2>2 Projektplan</h2>
-         <strong>ℹ️ Info:</strong> Der Projektplan wird automatisch aktualisiert, wenn die KI .ics-Kalender-Daten erstellt. 
-         Aktuell werden <strong>{roadmapData.length} Termine</strong> angezeigt.
-     
+        
+          <h2>{data && data.app_Headline3}</h2>
+       
+      
+         <strong>ℹ️ {data?.chat_infoLabel || 'Info'}:</strong> {data?.chat_roadmapInfo 
+          // || 'Der Projektplan wird automatisch aktualisiert, wenn die KI .ics-Kalender-Daten erstellt. Aktuell werden {count} Termine angezeigt.').replace('{count}', roadmapData.length)}
+     } <strong>{roadmapData.length}</strong>
         <Roadmap 
           roadmapData={roadmapData}
           />

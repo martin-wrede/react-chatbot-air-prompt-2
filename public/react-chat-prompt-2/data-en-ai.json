@@ -1,5 +1,28 @@
 {
-  "language": "en",
+ 
+  "app_Headline1": "Chatbot",
+  "app_Headline2": "AI Chatbot / Download link",
+  "app_Headline3": "Full Project Plan",
+
+  "chat_activePromptLabel": "Active Prompt",
+  "chat_startConversation": "Start a conversation...",
+  "chat_youLabel": "You:",
+  "chat_systemLabel": "System:",
+  "chat_aiLabel": "AI:",
+  "chat_aiTyping": "AI is typing...",
+  "chat_messagePlaceholder": "Type your message...",
+  "chat_sendButton": "Send",
+  "chat_infoLabel": "Info",
+  "chat_roadmapInfo": "The project plan is updated automatically when the AI generates .ics calendar data. Currently displayed events:",
+
+  "chat_uploadFilesLabel": "Upload text and calendar files",
+  "chat_fileHint": ".txt and .ics files allowed (ICS files are imported automatically)",
+  "chat_uploadedFilesTitle": "Uploaded files ({count}):",
+  "chat_filesAttached": "{count} file(s) attached",
+  "chat_deleteFileTooltip": "Delete file",
+  "chat_calendarType": "Calendar",
+
+
 
   "personalDataLabel": "Personal Data",
   "ageLabel": "Age:",

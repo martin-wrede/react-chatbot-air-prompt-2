@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Form from './components/Form';
 import Roadmap from './components/Roadmap';
+import { Context } from './Context';
 import { Upload, X, File, Download } from 'lucide-react';
 import './App.css';
 
@@ -11,13 +12,15 @@ function App() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [gesamtPrompt, setGesamtPrompt] = useState("")
 
+   const { data } = useContext(Context);
+ 
 // If you want to parse the URL of current page in browser:
-
 let params = new URLSearchParams(location.search);
 
 let part1 = params.get('part1');
 let part2 = params.get('part2');
 let part3 = params.get('part3');
+
  
 
 // State for roadmap data - starts with sample data
@@ -474,7 +477,9 @@ let part3 = params.get('part3');
   return (
     <div className="app-container">
       <div id="part1" style={{backgroundColor:"white", display:part1}}>
-        <h2>1 Chatbot</h2>
+      
+          <h2>{data && data.app_Headline1}</h2>
+        
       <div id="form-all-id">
         <Form onPromptChange={setGesamtPrompt} />
       </div>
@@ -497,7 +502,9 @@ let part3 = params.get('part3');
      
       {/* Chat Container All */}
       <div className="chat-container">
-        <h2>AI Chatbot / Download link</h2>
+    
+        
+          <h2>{data && data.app_Headline2}</h2>
         {/* Chat Messages Container */}
         <div className="chat-container">
           {messages.length === 0 ? (
@@ -692,7 +699,10 @@ let part3 = params.get('part3');
         
        
        <div id="part3" style={{ display:part3 }}>
-        <h2>2 Projektplan</h2>
+        
+          <h2>{data && data.app_Headline3}</h2>
+       
+      
          <strong>ℹ️ Info:</strong> Der Projektplan wird automatisch aktualisiert, wenn die KI .ics-Kalender-Daten erstellt. 
          Aktuell werden <strong>{roadmapData.length} Termine</strong> angezeigt.
      
