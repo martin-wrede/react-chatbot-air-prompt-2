@@ -2,9 +2,8 @@ import React, { useState, useContext } from 'react';
 import { Context } from '../Context';
 import './Roadmap.css';
 
-// CSS styles as JavaScript object
+// CSS styles as JavaScript object // keep it here because there is somme JS still referring to it
 const styles = {
-
 };
 
 // Helper function to format date based on language
@@ -155,20 +154,21 @@ export default function Roadmap({ roadmapData }) {
           <h1 className="title">{data.roadmapLabels?.title || 'AI Coach Roadmap'}</h1>
         </div>
         <p className="subtitle">{data.roadmapLabels?.subtitle || 'Your personalized journey to success'}</p>
-        
+
+ {/* Export Button  css */}
+     
+<button
+  className={`export-button ${hoveredButton === 'export' ? 'export-button-hovered' : ''}`}
+  onClick={downloadICS}
+  onMouseEnter={() => setHoveredButton('export')}
+  onMouseLeave={() => setHoveredButton(null)}
+>
+  <span>{data.roadmapLabels?.exportIcon || '⬇️'}</span>
+  {data.roadmapLabels?.exportButton || 'Export to Calendar (.ics)'}
+</button>    
+
         {/* Export Button */}
-        <button
-          style={{
-            ...styles.exportButton,
-            ...(hoveredButton === 'export' ? styles.exportButtonHover : {})
-          }}
-          onClick={downloadICS}
-          onMouseEnter={() => setHoveredButton('export')}
-          onMouseLeave={() => setHoveredButton(null)}
-        >
-          <span>{data.roadmapLabels?.exportIcon || '⬇️'}</span>
-          {data.roadmapLabels?.exportButton || 'Export to Calendar (.ics)'}
-        </button>
+      
       </div>
 
       {/* Calendar Grid */}
@@ -189,23 +189,23 @@ export default function Roadmap({ roadmapData }) {
               onMouseEnter={() => setHoveredButton(item.date)}
               onMouseLeave={() => setHoveredButton(null)}
             >
-              {/* Date Header */}
-              <div className="cardHeader">
-                <div className="dateInfo">
-                  <div className="dayName">{dateInfo.dayName}</div>
-                  <div className="day">{dateInfo.day}</div>
-                  <div className="monthYear">{dateInfo.month} {dateInfo.year}</div>
-                </div>
-                <button
-                  onClick={() => toggleTaskComplete(item.date)}
-                  style={{
-                    ...styles.completeButton,
-                    ...(isCompleted ? styles.completeButtonActive : styles.completeButtonInactive)
-                  }}
-                >
-                  {isCompleted ? (data.roadmapLabels?.completedIcon || '✅') : (data.roadmapLabels?.incompleteIcon || '⭕')}
-                </button>
-              </div>
+
+                {/* Date Header CSS */}
+  <div className="cardHeader">
+    <div className="dateInfo">
+      <div className="dayName">{dateInfo.dayName}</div>
+      <div className="day">{dateInfo.day}</div>
+      <div className="monthYear">{dateInfo.month} {dateInfo.year}</div>
+    </div>
+    <button
+      onClick={() => toggleTaskComplete(item.date)}
+      className={`complete-button ${isCompleted ? 'complete-button-active' : 'complete-button-inactive'}`}
+    >
+      {isCompleted ? (data.roadmapLabels?.completedIcon || '✅') : (data.roadmapLabels?.incompleteIcon || '⭕')}
+    </button>
+  </div>
+
+             
 
               {/* Time Information */}
               <div className="timeSection">
@@ -224,19 +224,16 @@ export default function Roadmap({ roadmapData }) {
               </div>
 
               {/* Task */}
-              <div className="taskSection">
-                <div className="sectionTitle">
-                  {data.roadmapLabels?.taskIcon || '🎯'} {data.roadmapLabels?.todaysTask || "Today's Task"}
-                </div>
-                <p style={{
-                  ...styles.taskText,
-                  ...(isCompleted ? styles.taskCompleted : {})
-                }}>
-
-                  {item.task}
-                </p>
-              </div>
-
+  {/* Task Section */}
+  <div className="taskSection">
+    <div className="sectionTitle">
+      {data.roadmapLabels?.taskIcon || '🎯'} {data.roadmapLabels?.todaysTask || "Today's Task"}
+    </div>
+    <p className={`task-text ${isCompleted ? 'task-completed' : ''}`}>
+      {item.task}
+    </p>
+  </div>
+ 
               {/* Motivation */}
               <div className="taskSection">
                 <div className="sectionTitle">
@@ -246,20 +243,21 @@ export default function Roadmap({ roadmapData }) {
               </div>
 
               {/* Google Calendar Link */}
-              <a
-                href={generateGoogleCalendarUrl(item)}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  ...styles.googleCalendarLink,
-                  ...(hoveredButton === `cal-${item.date}` ? { backgroundColor: '#bfdbfe' } : {})
-                }}
-                onMouseEnter={() => setHoveredButton(`cal-${item.date}`)}
-                onMouseLeave={() => setHoveredButton(null)}
-              >
-                <span>{data.roadmapLabels?.calendarIcon || '🔗'}</span>
-                {data.roadmapLabels?.addToGoogleCalendar || 'Add to Google Calendar'}
-              </a>
+
+  {/* Google Calendar Link */}
+  <a
+    href={generateGoogleCalendarUrl(item)}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`google-calendar-link ${hoveredButton === `cal-${item.date}` ? 'google-calendar-link-hovered' : ''}`}
+    onMouseEnter={() => setHoveredButton(`cal-${item.date}`)}
+    onMouseLeave={() => setHoveredButton(null)}
+  >
+    <span>{data.roadmapLabels?.calendarIcon || '🔗'}</span>
+    {data.roadmapLabels?.addToGoogleCalendar || 'Add to Google Calendar'}
+  </a>
+
+ 
             </div>
           );
         })}
@@ -269,6 +267,8 @@ export default function Roadmap({ roadmapData }) {
       <div className="progressContainer">
         <h2 className="progressTitle">{data.roadmapLabels?.progressTitle || 'Progress Summary'}</h2>
         <div className="progressBar">
+          
+         
           <div className="progressBarTrack">
             <div 
               style={{

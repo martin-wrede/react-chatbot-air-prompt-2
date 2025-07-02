@@ -1,5 +1,4 @@
 {
- 
   "app_Headline1": "Chatbot",
   "app_Headline2": "AI Chatbot / Download link",
   "app_Headline3": "Full Project Plan",
@@ -43,7 +42,7 @@
   "question9": "In which industry/field do you work?",
   "question9Hint": "e.g., Marketing, Technology, Healthcare",
 
-  "submitButton": "Create Roadmap",
+  "submitButton": "Save Project",
 
   "workDays": {
     "monday": "Monday",

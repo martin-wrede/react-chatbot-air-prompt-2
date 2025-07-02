@@ -1,10 +1,262 @@
 import React, { useState, useContext } from 'react';
 import { Context } from '../Context';
-import './Roadmap.css';
 
 // CSS styles as JavaScript object
 const styles = {
-
+  container: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '24px',
+    background: 'linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%)',
+    minHeight: '100vh',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  header: {
+    textAlign: 'center',
+    marginBottom: '32px'
+  },
+  headerTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+    marginBottom: '16px'
+  },
+  title: {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    color: '#1f2937',
+    margin: 0
+  },
+  subtitle: {
+    color: '#6b7280',
+    marginBottom: '24px'
+  },
+  exportButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 16px',
+    backgroundColor: '#4f46e5',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+    transition: 'background-color 0.2s',
+    margin: '0 auto'
+  },
+  exportButtonHover: {
+    backgroundColor: '#4338ca'
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+    gap: '24px',
+    marginBottom: '32px'
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '24px',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    borderLeft: '4px solid #4f46e5',
+    transition: 'transform 0.2s, box-shadow 0.2s'
+  },
+  cardCompleted: {
+    backgroundColor: '#f0fdf4',
+    borderLeftColor: '#10b981'
+  },
+  cardHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '16px'
+  },
+  dateInfo: {
+    textAlign: 'center'
+  },
+  dayName: {
+    fontSize: '12px',
+    color: '#6b7280',
+    fontWeight: '500'
+  },
+  day: {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    color: '#1f2937'
+  },
+  monthYear: {
+    fontSize: '10px',
+    color: '#6b7280'
+  },
+  completeButton: {
+    padding: '8px',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '50%',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+    fontSize: '20px'
+  },
+  completeButtonActive: {
+    backgroundColor: '#dcfce7',
+    color: '#059669'
+  },
+  completeButtonInactive: {
+    backgroundColor: '#f3f4f6',
+    color: '#9ca3af'
+  },
+  taskSection: {
+    marginBottom: '16px'
+  },
+  sectionTitle: {
+    fontSize: '12px',
+    fontWeight: '500',
+    color: '#6b7280',
+    marginBottom: '4px'
+  },
+  taskText: {
+    fontSize: '14px',
+    lineHeight: '1.5',
+    color: '#1f2937'
+  },
+  taskCompleted: {
+    textDecoration: 'line-through',
+    color: '#6b7280'
+  },
+  motivationText: {
+    fontSize: '14px',
+    lineHeight: '1.5',
+    color: '#374151'
+  },
+  timeSection: {
+    display: 'flex',
+    gap: '16px',
+    marginBottom: '16px',
+    padding: '12px',
+    backgroundColor: '#f8fafc',
+    borderRadius: '8px',
+    border: '1px solid #e2e8f0'
+  },
+  timeInfo: {
+    flex: 1,
+    textAlign: 'center'
+  },
+  timeValue: {
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: '2px'
+  },
+  timeLabel: {
+    fontSize: '11px',
+    color: '#6b7280',
+    fontWeight: '500'
+  },
+  googleCalendarLink: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    width: '100%',
+    padding: '8px 12px',
+    fontSize: '12px',
+    backgroundColor: '#dbeafe',
+    color: '#1d4ed8',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    transition: 'background-color 0.2s',
+    marginTop: '16px',
+    border: '1px solid #e5e7eb'
+  },
+  progressContainer: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '24px',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+  },
+  progressTitle: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: '16px'
+  },
+  progressBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px'
+  },
+  progressBarTrack: {
+    flex: 1,
+    height: '12px',
+    backgroundColor: '#e5e7eb',
+    borderRadius: '6px',
+    overflow: 'hidden'
+  },
+  progressBarFill: {
+    height: '100%',
+    background: 'linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%)',
+    borderRadius: '6px',
+    transition: 'width 0.3s ease'
+  },
+  progressText: {
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#6b7280',
+    whiteSpace: 'nowrap'
+  },
+  timeStats: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gap: '16px',
+    marginTop: '16px'
+  },
+  statCard: {
+    textAlign: 'center',
+    padding: '16px',
+    backgroundColor: '#f8fafc',
+    borderRadius: '8px',
+    border: '1px solid #e2e8f0'
+  },
+  statValue: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: '#4f46e5',
+    marginBottom: '4px'
+  },
+  statLabel: {
+    fontSize: '12px',
+    color: '#6b7280',
+    fontWeight: '500'
+  },
+  infoBox: {
+    marginTop: '24px',
+    backgroundColor: '#eff6ff',
+    border: '1px solid #bfdbfe',
+    borderRadius: '8px',
+    padding: '16px'
+  },
+  infoTitle: {
+    fontWeight: '500',
+    color: '#1e40af',
+    marginBottom: '8px'
+  },
+  infoText: {
+    fontSize: '14px',
+    color: '#1e40af',
+    marginBottom: '12px'
+  },
+  codeBlock: {
+    fontSize: '12px',
+    color: '#1e40af',
+    backgroundColor: 'white',
+    padding: '12px',
+    borderRadius: '4px',
+    border: '1px solid #e5e7eb',
+    fontFamily: 'monospace'
+  }
 };
 
 // Helper function to format date based on language
@@ -144,17 +396,17 @@ export default function Roadmap({ roadmapData }) {
   const avgHoursPerDay = currentRoadmapData.length > 0 ? totalHours / currentRoadmapData.length : 0;
 
   // Get language from context or default to 'de'
-  const language = data.language || 'en';
+  const language = data.language || 'de';
 
   return (
-    <div className="container">
+    <div style={styles.container}>
       {/* Header */}
-      <div className="header">
-        <div className="headerTitle">
+      <div style={styles.header}>
+        <div style={styles.headerTitle}>
           <span style={{ fontSize: '24px' }}>{data.roadmapLabels?.headerIcon || '📅'}</span>
-          <h1 className="title">{data.roadmapLabels?.title || 'AI Coach Roadmap'}</h1>
+          <h1 style={styles.title}>{data.roadmapLabels?.title || 'AI Coach Roadmap'}</h1>
         </div>
-        <p className="subtitle">{data.roadmapLabels?.subtitle || 'Your personalized journey to success'}</p>
+        <p style={styles.subtitle}>{data.roadmapLabels?.subtitle || 'Your personalized journey to success'}</p>
         
         {/* Export Button */}
         <button
@@ -172,7 +424,7 @@ export default function Roadmap({ roadmapData }) {
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid">
+      <div style={styles.grid}>
         {currentRoadmapData.map((item) => {
           const dateInfo = formatDate(item.date, language);
           const isCompleted = completedTasks.has(item.date);
@@ -190,11 +442,11 @@ export default function Roadmap({ roadmapData }) {
               onMouseLeave={() => setHoveredButton(null)}
             >
               {/* Date Header */}
-              <div className="cardHeader">
-                <div className="dateInfo">
-                  <div className="dayName">{dateInfo.dayName}</div>
-                  <div className="day">{dateInfo.day}</div>
-                  <div className="monthYear">{dateInfo.month} {dateInfo.year}</div>
+              <div style={styles.cardHeader}>
+                <div style={styles.dateInfo}>
+                  <div style={styles.dayName}>{dateInfo.dayName}</div>
+                  <div style={styles.day}>{dateInfo.day}</div>
+                  <div style={styles.monthYear}>{dateInfo.month} {dateInfo.year}</div>
                 </div>
                 <button
                   onClick={() => toggleTaskComplete(item.date)}
@@ -208,41 +460,40 @@ export default function Roadmap({ roadmapData }) {
               </div>
 
               {/* Time Information */}
-              <div className="timeSection">
-                <div className="timeInfo">
-                  <div className="timeValue">{data.roadmapLabels?.startTimeIcon || '🕘'} {item.dailyStartTime || '10:00'}</div>
-                  <div className="timeLabel">{data.roadmapLabels?.startTimeLabel || 'START TIME'}</div>
+              <div style={styles.timeSection}>
+                <div style={styles.timeInfo}>
+                  <div style={styles.timeValue}>{data.roadmapLabels?.startTimeIcon || '🕘'} {item.dailyStartTime || '10:00'}</div>
+                  <div style={styles.timeLabel}>{data.roadmapLabels?.startTimeLabel || 'START TIME'}</div>
                 </div>
-                <div className="timeInfo">
-                  <div className="timeValue">{data.roadmapLabels?.durationIcon || '⏱️'} {item.dailyHours || 1}{data.roadmapLabels?.hoursShort || 'h'}</div>
-                  <div className="timeLabel">{data.roadmapLabels?.durationLabel || 'DURATION'}</div>
+                <div style={styles.timeInfo}>
+                  <div style={styles.timeValue}>{data.roadmapLabels?.durationIcon || '⏱️'} {item.dailyHours || 1}{data.roadmapLabels?.hoursShort || 'h'}</div>
+                  <div style={styles.timeLabel}>{data.roadmapLabels?.durationLabel || 'DURATION'}</div>
                 </div>
-                <div className="timeInfo">
-                  <div className="timeValue">{data.roadmapLabels?.endTimeIcon || '🕕'} {endTime}</div>
-                  <div className="timeLabel">{data.roadmapLabels?.endTimeLabel || 'END TIME'}</div>
+                <div style={styles.timeInfo}>
+                  <div style={styles.timeValue}>{data.roadmapLabels?.endTimeIcon || '🕕'} {endTime}</div>
+                  <div style={styles.timeLabel}>{data.roadmapLabels?.endTimeLabel || 'END TIME'}</div>
                 </div>
               </div>
 
               {/* Task */}
-              <div className="taskSection">
-                <div className="sectionTitle">
+              <div style={styles.taskSection}>
+                <div style={styles.sectionTitle}>
                   {data.roadmapLabels?.taskIcon || '🎯'} {data.roadmapLabels?.todaysTask || "Today's Task"}
                 </div>
                 <p style={{
                   ...styles.taskText,
                   ...(isCompleted ? styles.taskCompleted : {})
                 }}>
-
                   {item.task}
                 </p>
               </div>
 
               {/* Motivation */}
-              <div className="taskSection">
-                <div className="sectionTitle">
+              <div style={styles.taskSection}>
+                <div style={styles.sectionTitle}>
                   {data.roadmapLabels?.motivationIcon || '💖'} {data.roadmapLabels?.motivationLabel || 'Motivation'}
                 </div>
-                <p className="motivationText">{item.motivation}</p>
+                <p style={styles.motivationText}>{item.motivation}</p>
               </div>
 
               {/* Google Calendar Link */}
@@ -266,10 +517,10 @@ export default function Roadmap({ roadmapData }) {
       </div>
 
       {/* Progress Summary */}
-      <div className="progressContainer">
-        <h2 className="progressTitle">{data.roadmapLabels?.progressTitle || 'Progress Summary'}</h2>
-        <div className="progressBar">
-          <div className="progressBarTrack">
+      <div style={styles.progressContainer}>
+        <h2 style={styles.progressTitle}>{data.roadmapLabels?.progressTitle || 'Progress Summary'}</h2>
+        <div style={styles.progressBar}>
+          <div style={styles.progressBarTrack}>
             <div 
               style={{
                 ...styles.progressBarFill,
@@ -277,36 +528,36 @@ export default function Roadmap({ roadmapData }) {
               }}
             ></div>
           </div>
-          <span className="progressText">
+          <span style={styles.progressText}>
             {completedTasks.size} {data.roadmapLabels?.ofLabel || 'of'} {currentRoadmapData.length} {data.roadmapLabels?.tasksCompleted || 'tasks completed'}
           </span>
         </div>
         
         {/* Time Statistics */}
-        <div className="timeStats">
-          <div className="statCard">
-            <div className="statValue">{totalHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div className="statLabel">{data.roadmapLabels?.totalHours || 'Total Hours'}</div>
+        <div style={styles.timeStats}>
+          <div style={styles.statCard}>
+            <div style={styles.statValue}>{totalHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
+            <div style={styles.statLabel}>{data.roadmapLabels?.totalHours || 'Total Hours'}</div>
           </div>
-          <div className="statCard">
-            <div className="statValue">{completedHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div className="statLabel">{data.roadmapLabels?.completedHours || 'Completed Hours'}</div>
+          <div style={styles.statCard}>
+            <div style={styles.statValue}>{completedHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
+            <div style={styles.statLabel}>{data.roadmapLabels?.completedHours || 'Completed Hours'}</div>
           </div>
-          <div className="statCard">
-            <div className="statValue">{avgHoursPerDay.toFixed(1)}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div className="statLabel">{data.roadmapLabels?.avgHoursPerDay || 'Avg Hours/Day'}</div>
+          <div style={styles.statCard}>
+            <div style={styles.statValue}>{avgHoursPerDay.toFixed(1)}{data.roadmapLabels?.hoursShort || 'h'}</div>
+            <div style={styles.statLabel}>{data.roadmapLabels?.avgHoursPerDay || 'Avg Hours/Day'}</div>
           </div>
-          <div className="statCard">
-            <div className="statValue">{totalHours - completedHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div className="statLabel">{data.roadmapLabels?.remainingHours || 'Remaining Hours'}</div>
+          <div style={styles.statCard}>
+            <div style={styles.statValue}>{totalHours - completedHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
+            <div style={styles.statLabel}>{data.roadmapLabels?.remainingHours || 'Remaining Hours'}</div>
           </div>
         </div>
       </div>
 
       {/* Info Box */}
-      <div className="infoBox">
-        <h3 className="infoTitle">{data.roadmapLabels?.infoTitle || 'Enhanced Time Tracking'}</h3>
-        <p className="infoText">
+      <div style={styles.infoBox}>
+        <h3 style={styles.infoTitle}>{data.roadmapLabels?.infoTitle || 'Enhanced Time Tracking'}</h3>
+        <p style={styles.infoText}>
           {data.roadmapLabels?.infoText || 'The roadmap now includes detailed time management with start times, duration, and end times. Calendar exports include precise scheduling information.'}
         </p>
       </div>

@@ -1,5 +1,4 @@
 {
- "lang":"en",
 "app_Headline1": "Chatbot",
   "app_Headline2": "AI Chatbot / Download link",
   "app_Headline3": "Vollständiger Projektplan",
@@ -40,7 +39,7 @@
   "question9": "In welcher Branche/Bereich arbeiten Sie?",
   "question9Hint": "z.B. Marketing, Technologie, Gesundheitswesen",
   
-  "submitButton": "Roadmap erstellen",
+  "submitButton": "Projekt speichern",
   
   "workDays": {
     "monday": "Montag",
