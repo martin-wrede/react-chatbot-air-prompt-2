@@ -37,7 +37,6 @@ const Context = React.createContext({
       infoText: 'The roadmap now includes detailed time management with start times, duration, and end times. Calendar exports include precise scheduling information.',
       calendarEventPrefix: 'AI Coach',
       taskLabel: 'Task',
-      motivationLabel: 'Motivation',
       hoursLabel: 'hours',
       icsFileName: 'ai-coach-roadmap.ics',
       calendarLocation: 'Personal Development'
