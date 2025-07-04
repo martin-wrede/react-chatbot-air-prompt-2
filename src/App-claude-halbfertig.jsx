@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import Form from './components/Form';
 import Roadmap from './components/RoadmapEdit';
@@ -48,14 +47,6 @@ let part3 = params.get('part3');
   const todayTasks = roadmapData.filter(item => item.date === today);
   setRoadmapToday(todayTasks); // always update, even if empty
 }, [roadmapData]);
-
-  // NEW: Handler for updates made in the RoadmapEdit component
-  const handleRoadmapUpdate = (updatedData) => {
-    // The child component returns the complete, updated list of tasks.
-    // We sort it by date and set it as the new state.
-    updatedData.sort((a, b) => new Date(a.date) - new Date(b.date));
-    setRoadmapData(updatedData);
-  };
 
   // NEW: Function to parse JSON content and convert to roadmap data format
   const parseJsonToRoadmapData = (jsonContent) => {
@@ -748,13 +739,13 @@ let part3 = params.get('part3');
               <input
                 type="file"
                 multiple
-                accept=".txt,.ics,.json,text/plain,text/calendar,application/json"
+                accept=".txt,.ics,text/plain,text/calendar"
                 onChange={handleFileUpload}
                 className="file-input"
               />
             </label>
             <span className="file-hint">
-              {data?.chat_fileHint || '.txt, .json und .ics Dateien erlaubt (werden automatisch importiert)'}
+              {data?.chat_fileHint || '.txt und .ics Dateien erlaubt (ICS-Dateien werden automatisch importiert)'}
             </span>
           </div>
 
@@ -825,29 +816,23 @@ let part3 = params.get('part3');
         <div id="part2" style={{display:part2}}>
                
           {roadmapToday.length > 0 ? (
-            <Roadmap roadmapData={roadmapToday} isToday={true} />
+          <Roadmap roadmapData={roadmapToday} />
           ) : (
-            <div style={{padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic'
-            }}>
-            {(data?.chat_noTasksToday || 'Keine Aufgaben für heute! ({today})').replace('{today}', today)}
+          <div style={{padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic'
+          }}>
+          {(data?.chat_noTasksToday || 'Keine Aufgaben für heute! ({today})').replace('{today}', today)}
+       </div>
+        )}
         </div>
-          )}
-        </div>
-
        <div id="part3" style={{ display:part3 }}>   
           <h2>{data && data.app_Headline3}</h2>
-          <p style={{marginBottom: '15px'}}>
-            <strong>ℹ️ {data?.chat_infoLabel || 'Info'}:</strong>
-             
-            {(data?.chat_roadmapInfo 
-              || 'Der Projektplan wird automatisch aktualisiert, wenn die KI .ics- oder .json-Kalenderdaten erstellt. Aktuell werden {count} Termine angezeigt.'
-            ).replace('{count}', roadmapData.length)}
-          </p>
+         <strong>ℹ️ {data?.chat_infoLabel || 'Info'}:</strong> {data?.chat_roadmapInfo 
+          // || 'Der Projektplan wird automatisch aktualisiert, wenn die KI .ics-Kalender-Daten erstellt. Aktuell werden {count} Termine angezeigt.').replace('{count}', roadmapData.length)}
+     } <strong>{roadmapData.length}</strong>
         <Roadmap 
           roadmapData={roadmapData}
-          onRoadmapUpdate={handleRoadmapUpdate}
-        />
-       </div>
+          />
+            </div>
     </div>
   );
 }

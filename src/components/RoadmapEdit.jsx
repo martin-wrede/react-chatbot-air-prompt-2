@@ -1,71 +1,113 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import './Roadmap.css';
+import { Context } from '../Context';
 
-// Mock Context for demo - replace with your actual Context
-const Context = React.createContext({
-  data: {
-    language: 'de',
-    roadmapLabels: {
-      headerIcon: '📅',
-      title: 'AI Coach Roadmap',
-      subtitle: 'Your personalized journey to success',
-      exportIcon: '⬇️',
-      exportButton: 'Export to Calendar (.ics)',
-      completedIcon: '✅',
-      incompleteIcon: '⭕',
-      startTimeIcon: '🕘',
-      startTimeLabel: 'STARTZEIT',
-      durationIcon: '⏱️',
-      durationLabel: 'DAUER',
-      endTimeIcon: '🕕',
-      endTimeLabel: 'ENDZEIT',
-      taskIcon: '🎯',
-      todaysTask: 'Heutige Aufgabe',
-      motivationIcon: '💖',
-      motivationLabel: 'Motivation',
-      calendarIcon: '🔗',
-      addToGoogleCalendar: 'Add to Google Calendar',
-      progressTitle: 'Progress Summary',
-      ofLabel: 'of',
-      tasksCompleted: 'tasks completed',
-      hoursShort: 'h',
-      totalHours: 'Total Hours',
-      completedHours: 'Completed Hours',
-      avgHoursPerDay: 'Avg Hours/Day',
-      remainingHours: 'Remaining Hours',
-      infoTitle: 'Enhanced Time Tracking',
-      infoText: 'The roadmap now includes detailed time management with start times, duration, and end times. Calendar exports include precise scheduling information.',
-      calendarEventPrefix: 'AI Coach',
-      taskLabel: 'Task',
-      hoursLabel: 'hours',
-      icsFileName: 'ai-coach-roadmap.ics',
-      calendarLocation: 'Personal Development'
-    },
-    sampleRoadmapData: [
-      {
-        date: '2025-07-03',
-        dailyStartTime: '09:00',
-        dailyHours: 2,
-        task: 'Complete React component refactoring',
-        motivation: 'Improve code maintainability and performance'
-      },
-      {
-        date: '2025-07-04',
-        dailyStartTime: '10:30',
-        dailyHours: 1.5,
-        task: 'Design new user interface mockups',
-        motivation: 'Create better user experience'
-      },
-      {
-        date: '2025-07-05',
-        dailyStartTime: '14:00',
-        dailyHours: 3,
-        task: 'Implement authentication system',
-        motivation: 'Enhance application security'
-      }
-    ]
-  }
-});
+// Helper functions
+const formatDate = (dateStr, language = 'de') => {
+  const date = new Date(dateStr);
+  
+  const daysDE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  const daysEN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+  const monthsDE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+  const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  const days = language === 'de' ? daysDE : daysEN;
+  const months = language === 'de' ? monthsDE : monthsEN;
+  
+  return {
+    dayName: days[date.getDay()],
+    day: date.getDate(),
+    month: months[date.getMonth()],
+    year: date.getFullYear(),
+    fullDate: date.toLocaleDateString()
+  };
+};
+
+const calculateEndTime = (startTime, hours) => {
+  const [startHour, startMinute] = startTime.split(':').map(Number);
+  const totalMinutes = startHour * 60 + startMinute + (hours * 60);
+  const endHour = Math.floor(totalMinutes / 60);
+  const endMinute = totalMinutes % 60;
+  
+  return `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+};
+
+// Helper function to generate ICS content
+const generateICS = (roadmapData, labels) => {
+  const icsHeader = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AI Coach//Roadmap//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH`;
+
+  const icsFooter = `END:VCALENDAR`;
+
+  const events = roadmapData.map(item => {
+    const date = new Date(item.date);
+    const [startHour, startMinute] = (item.dailyStartTime || '10:00').split(':').map(Number);
+    const duration = item.dailyHours || 1;
+    
+    const startDate = new Date(date);
+    startDate.setHours(startHour, startMinute, 0, 0);
+    
+    const endDate = new Date(startDate);
+    endDate.setTime(startDate.getTime() + (duration * 60 * 60 * 1000));
+    
+    const startDateStr = startDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    
+    const isCompleted = item.completed;
+    const summary = `${labels?.calendarEventPrefix || 'AI Coach'}: ${isCompleted ? '✅ ' : ''}${item.task}`;
+    const description = `${labels?.taskLabel || 'Task'}: ${isCompleted ? '[Completed] ' : ''}${item.task}\\n\\n${labels?.startTimeLabel || 'START TIME'}: ${item.dailyStartTime || '10:00'}\\n${labels?.durationLabel || 'DURATION'}: ${item.dailyHours || 1} ${labels?.hoursLabel || 'hours'}\\n\\n${labels?.motivationLabel || 'Motivation'}: ${item.motivation}`;
+
+    return `BEGIN:VEVENT
+UID:${Date.now()}-${Math.random().toString(36).substr(2, 9)}@aicoach.com
+DTSTART:${startDateStr}
+DTEND:${endDateStr}
+SUMMARY:${summary}
+DESCRIPTION:${description}
+CATEGORIES:AI Coach,Personal Development
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+`;
+  }).join('\n');
+
+  return `${icsHeader}\n${events}\n${icsFooter}`;
+};
+
+const generateGoogleCalendarUrl = (task, data, completedTasks) => {
+  const labels = data.roadmapLabels;
+  const date = new Date(task.date);
+  const [startHour, startMinute] = (task.dailyStartTime || '10:00').split(':').map(Number);
+  const duration = task.dailyHours || 1;
+
+  const startDate = new Date(date);
+  startDate.setHours(startHour, startMinute, 0, 0);
+
+  const endDate = new Date(startDate);
+  endDate.setTime(startDate.getTime() + (duration * 60 * 60 * 1000));
+
+  const startDateStr = startDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+  const isCompleted = completedTasks.has(task.date);
+  const prefix = isCompleted ? '✅ ' : '';
+  const label = isCompleted ? '[Completed] ' : '';
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: `${prefix}${labels?.calendarEventPrefix || ''}: ${task.task}`,
+    dates: `${startDateStr}/${endDateStr}`,
+    details: `${label}${labels?.taskLabel || 'Task'}: ${task.task}\n\n${labels?.startTimeLabel || 'START TIME'}: ${task.dailyStartTime || '10:00'}\n${labels?.durationLabel || 'DURATION'}: ${task.dailyHours || 1} ${labels?.hoursLabel || 'hours'}\n\n${labels?.motivationLabel || 'Motivation'}: ${task.motivation}`,
+    location: isCompleted
+      ? `[Completed] ${labels?.calendarLocation || 'Personal Development'}`
+      : labels?.calendarLocation || 'Personal Development'
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+};
 
 // CSS styles as JavaScript object for edit mode
 const editStyles = {
@@ -157,92 +199,22 @@ const editStyles = {
   }
 };
 
-// Helper function to format date based on language
-const formatDate = (dateStr, language = 'de') => {
-  const date = new Date(dateStr);
-  
-  const daysDE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-  const daysEN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  
-  const monthsDE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-  const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  
-  const days = language === 'de' ? daysDE : daysEN;
-  const months = language === 'de' ? monthsDE : monthsEN;
-  
-  return {
-    dayName: days[date.getDay()],
-    day: date.getDate(),
-    month: months[date.getMonth()],
-    year: date.getFullYear(),
-    fullDate: date.toLocaleDateString()
-  };
-};
-
-// Helper function to calculate end time
-const calculateEndTime = (startTime, hours) => {
-  const [startHour, startMinute] = startTime.split(':').map(Number);
-  const totalMinutes = startHour * 60 + startMinute + (hours * 60);
-  const endHour = Math.floor(totalMinutes / 60);
-  const endMinute = totalMinutes % 60;
-  
-  return `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
-};
-
-// Helper function to generate ICS content
-const generateICS = (roadmapData, labels) => {
-  const icsHeader = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//AI Coach//Roadmap//EN
-CALSCALE:GREGORIAN
-METHOD:PUBLISH`;
-
-  const icsFooter = `END:VCALENDAR`;
-
-  const events = roadmapData.map(item => {
-    const date = new Date(item.date);
-    const [startHour, startMinute] = (item.dailyStartTime || '10:00').split(':').map(Number);
-    const duration = item.dailyHours || 1;
-    
-    const startDate = new Date(date);
-    startDate.setHours(startHour, startMinute, 0, 0);
-    
-    const endDate = new Date(startDate);
-    endDate.setHours(startDate.getHours() + duration);
-    
-    const startDateStr = startDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    
-    const isCompleted = item.completed;
-    const summary = `${labels.calendarEventPrefix}: ${isCompleted ? '✅ ' : ''}${item.task}`;
-    const description = `${labels.taskLabel}: ${isCompleted ? '[Completed] ' : ''}${item.task}\\n\\n${labels.startTimeLabel}: ${item.dailyStartTime || '10:00'}\\n${labels.durationLabel}: ${item.dailyHours || 1} ${labels.hoursLabel}\\n\\n${labels.motivationLabel}: ${item.motivation}`;
-
-    return `BEGIN:VEVENT
-UID:${Date.now()}-${Math.random().toString(36).substr(2, 9)}@aicoach.com
-DTSTART:${startDateStr}
-DTEND:${endDateStr}
-SUMMARY:${summary}
-DESCRIPTION:${description}
-CATEGORIES:AI Coach,Personal Development
-STATUS:CONFIRMED
-TRANSP:OPAQUE
-END:VEVENT
-`;
-  }).join('\n');
-
-  return `${icsHeader}\n${events}\n${icsFooter}`;
-};
-
 // Main Roadmap Component
-export default function Roadmap({ roadmapData }) {
+export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
   const { data } = useContext(Context);
   const [completedTasks, setCompletedTasks] = useState(new Set());
   const [editingTask, setEditingTask] = useState(null);
   const [editedData, setEditedData] = useState({});
-  const [tasks, setTasks] = useState(roadmapData || data.sampleRoadmapData || []);
+  const [localTasks, setLocalTasks] = useState(roadmapData || data.sampleRoadmapData || []);
   const [hoveredButton, setHoveredButton] = useState(null);
 
-  const currentRoadmapData = tasks.map(item => ({
+  // This hook ensures the component updates if the parent's data changes
+  useEffect(() => {
+    setLocalTasks(roadmapData || data.sampleRoadmapData || []);
+  }, [roadmapData, data.sampleRoadmapData]);
+
+  // Use localTasks for rendering
+  const currentRoadmapData = localTasks.map(item => ({
     ...item,
     completed: completedTasks.has(item.date),
   }));
@@ -273,13 +245,20 @@ export default function Roadmap({ roadmapData }) {
   };
 
   const saveTask = (date) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
-        task.date === date 
-          ? { ...task, ...editedData }
-          : task
-      )
+    const updatedTasks = localTasks.map(task =>
+      task.date === date
+        ? { ...task, ...editedData }
+        : task
     );
+    
+    // Update the local state for immediate UI feedback
+    setLocalTasks(updatedTasks);
+
+    // If the callback is provided, notify the parent component
+    if (onRoadmapUpdate) {
+      onRoadmapUpdate(updatedTasks);
+    }
+
     setEditingTask(null);
     setEditedData({});
   };
@@ -301,38 +280,7 @@ export default function Roadmap({ roadmapData }) {
     link.click();
     document.body.removeChild(link);
   };
-
-  const generateGoogleCalendarUrl = (task) => {
-    const date = new Date(task.date);
-    const [startHour, startMinute] = (task.dailyStartTime || '10:00').split(':').map(Number);
-    const duration = task.dailyHours || 1;
-
-    const startDate = new Date(date);
-    startDate.setHours(startHour, startMinute, 0, 0);
-
-    const endDate = new Date(startDate);
-    endDate.setHours(startDate.getHours() + duration);
-
-    const startDateStr = startDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const endDateStr = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-
-    const isCompleted = completedTasks.has(task.date);
-    const prefix = isCompleted ? '✅ ' : '';
-    const label = isCompleted ? '[Completed] ' : '';
-
-    const params = new URLSearchParams({
-      action: 'TEMPLATE',
-      text: `${prefix}${data.roadmapLabels?.calendarEventPrefix || ''}: ${task.task}`,
-      dates: `${startDateStr}/${endDateStr}`,
-      details: `${label}${data.roadmapLabels?.taskLabel}: ${task.task}\n\n${data.roadmapLabels?.startTimeLabel}: ${task.dailyStartTime || '10:00'}\n${data.roadmapLabels?.durationLabel}: ${task.dailyHours || 1} ${data.roadmapLabels?.hoursLabel}\n\n${data.roadmapLabels?.motivationLabel}: ${task.motivation}`,
-      location: isCompleted
-        ? `[Completed] ${data.roadmapLabels?.calendarLocation || 'Personal Development'}`
-        : data.roadmapLabels?.calendarLocation || 'Personal Development'
-    });
-
-    return `https://calendar.google.com/calendar/render?${params.toString()}`;
-  };
-
+  
   // Calculate statistics
   const totalHours = currentRoadmapData.reduce((sum, item) => sum + (item.dailyHours || 0), 0);
   const completedHours = currentRoadmapData
@@ -346,22 +294,9 @@ export default function Roadmap({ roadmapData }) {
     <div className="container">
       {/* Header */}
       <div className="header">
-        <div className="headerTitle">
-          <span style={{ fontSize: '24px' }}>{data.roadmapLabels?.headerIcon || '📅'}</span>
-          <h1 className="title">{data.roadmapLabels?.title || 'AI Coach Roadmap'}</h1>
-        </div>
-        <p className="subtitle">{data.roadmapLabels?.subtitle || 'Your personalized journey to success'}</p>
-        
-        {/* Export Button */}
-        <button
-          className="exportButton"
-          style={hoveredButton === 'export' ? { backgroundColor: '#4338ca', transform: 'translateY(-1px)' } : {}}
-          onClick={downloadICS}
-          onMouseEnter={() => setHoveredButton('export')}
-          onMouseLeave={() => setHoveredButton(null)}
-        >
-          <span>{data.roadmapLabels?.exportIcon || '⬇️'}</span>
-          {data.roadmapLabels?.exportButton || 'Export to Calendar (.ics)'}
+        <h1 className="title">{data.roadmapLabels?.title || 'Roadmap'}</h1>
+        <button onClick={downloadICS} className="downloadButton">
+          {data.roadmapLabels?.downloadICS || 'Download ICS'}
         </button>
       </div>
 
@@ -378,160 +313,130 @@ export default function Roadmap({ roadmapData }) {
             <div
               key={item.date}
               className={`card ${isCompleted ? 'cardCompleted' : ''}`}
-              style={hoveredButton === item.date ? { transform: 'translateY(-2px)', boxShadow: '0 8px 25px -5px rgba(0, 0, 0, 0.1)' } : {}}
-              onMouseEnter={() => setHoveredButton(item.date)}
-              onMouseLeave={() => setHoveredButton(null)}
             >
-              {/* Date Header */}
-              <div className="cardHeader">
+              <div className="dateHeader">
                 <div className="dateInfo">
-                  <div className="dayName">{dateInfo.dayName}</div>
-                  <div className="day">{dateInfo.day}</div>
-                  <div className="monthYear">{dateInfo.month} {dateInfo.year}</div>
+                  <span className="dayName">{dateInfo.dayName}</span>
+                  <span className="dateNumber">{dateInfo.day}</span>
+                  <span className="month">{dateInfo.month}</span>
                 </div>
-                
-                {/* Edit and Complete Controls */}
-                <div style={editStyles.buttonContainer}>
-                  {!isEditing && (
-                    <button
-                      onClick={() => startEditing(item)}
-                      style={{
-                        ...editStyles.editButton,
-                        ...(hoveredButton === `edit-${item.date}` ? editStyles.editButtonHover : {})
-                      }}
-                      onMouseEnter={() => setHoveredButton(`edit-${item.date}`)}
-                      onMouseLeave={() => setHoveredButton(null)}
-                      title="Edit task"
-                    >
-                      ✏️
-                    </button>
-                  )}
-                  
-                  {isEditing ? (
-                    <>
-                      <button
-                        onClick={() => saveTask(item.date)}
-                        style={editStyles.saveButton}
-                        title="Save changes"
-                      >
-                        ✅
-                      </button>
-                      <button
-                        onClick={cancelEditing}
-                        style={editStyles.cancelButton}
-                        title="Cancel editing"
-                      >
-                        ❌
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => toggleTaskComplete(item.date)}
-                      className={`completeButton ${isCompleted ? 'completeButtonActive' : 'completeButtonInactive'}`}
-                    >
-                      {isCompleted ? (data.roadmapLabels?.completedIcon || '✅') : (data.roadmapLabels?.incompleteIcon || '⭕')}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Time Information */}
-              <div className="timeSection">
                 <div className="timeInfo">
-                  <div className="timeValue">
-                    {data.roadmapLabels?.startTimeIcon || '🕘'} 
-                    {isEditing ? (
+                  {isEditing ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <input
                         type="time"
                         value={currentData.dailyStartTime || '10:00'}
                         onChange={(e) => updateEditedData('dailyStartTime', e.target.value)}
                         style={editStyles.timeInput}
                       />
+                      <span>-</span>
+                      <span style={{ fontSize: '12px', color: '#6b7280' }}>{endTime}</span>
+                    </div>
+                  ) : (
+                    <span className="time">{currentData.dailyStartTime || '10:00'} - {endTime}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="taskContent">
+                <div className="taskHeader">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={currentData.task || ''}
+                      onChange={(e) => updateEditedData('task', e.target.value)}
+                      style={editStyles.editInput}
+                      placeholder="Task description"
+                    />
+                  ) : (
+                    <h3 className="taskTitle">{currentData.task}</h3>
+                  )}
+                  
+                  <div className="taskActions">
+                    {isEditing ? (
+                      <div style={editStyles.buttonContainer}>
+                        <button
+                          onClick={() => saveTask(item.date)}
+                          style={editStyles.saveButton}
+                          title="Save"
+                        >
+                          ✓
+                        </button>
+                        <button
+                          onClick={cancelEditing}
+                          style={editStyles.cancelButton}
+                          title="Cancel"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     ) : (
-                      currentData.dailyStartTime || '10:00'
+                      <button
+                        onClick={() => startEditing(item)}
+                        style={{
+                          ...editStyles.editButton,
+                          ...(hoveredButton === `edit-${item.date}` ? editStyles.editButtonHover : {})
+                        }}
+                        onMouseEnter={() => setHoveredButton(`edit-${item.date}`)}
+                        onMouseLeave={() => setHoveredButton(null)}
+                        title="Edit"
+                      >
+                        ✎
+                      </button>
                     )}
                   </div>
-                  <div className="timeLabel">{data.roadmapLabels?.startTimeLabel || 'STARTZEIT'}</div>
                 </div>
-                
-                <div className="timeInfo">
-                  <div className="timeValue">
-                    {data.roadmapLabels?.durationIcon || '⏱️'} 
-                    {isEditing ? (
+
+                <div className="duration">
+                  {isEditing ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <input
                         type="number"
-                        step="0.1"
-                        min="0.1"
-                        max="24"
                         value={currentData.dailyHours || 1}
                         onChange={(e) => updateEditedData('dailyHours', parseFloat(e.target.value) || 1)}
                         style={editStyles.numberInput}
+                        min="0.5"
+                        step="0.5"
                       />
-                    ) : (
-                      currentData.dailyHours || 1
-                    )}
-                    {data.roadmapLabels?.hoursShort || 'h'}
-                  </div>
-                  <div className="timeLabel">{data.roadmapLabels?.durationLabel || 'DAUER'}</div>
+                      <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                        {data.roadmapLabels?.hoursLabel || 'hours'}
+                      </span>
+                    </div>
+                  ) : (
+                    <span>{currentData.dailyHours || 1} {data.roadmapLabels?.hoursLabel || 'hours'}</span>
+                  )}
                 </div>
-                
-                <div className="timeInfo">
-                  <div className="timeValue">{data.roadmapLabels?.endTimeIcon || '🕕'} {endTime}</div>
-                  <div className="timeLabel">{data.roadmapLabels?.endTimeLabel || 'ENDZEIT'}</div>
+
+                <div className="motivation">
+                  {isEditing ? (
+                    <textarea
+                      value={currentData.motivation || ''}
+                      onChange={(e) => updateEditedData('motivation', e.target.value)}
+                      style={editStyles.textArea}
+                      placeholder="Motivation..."
+                    />
+                  ) : (
+                    <p>{currentData.motivation}</p>
+                  )}
                 </div>
               </div>
 
-              {/* Task */}
-              <div className="taskSection">
-                <div className="sectionTitle">
-                  {data.roadmapLabels?.taskIcon || '🎯'} {data.roadmapLabels?.todaysTask || "Heutige Aufgabe"}
-                </div>
-                {isEditing ? (
-                  <textarea
-                    value={currentData.task || ''}
-                    onChange={(e) => updateEditedData('task', e.target.value)}
-                    style={editStyles.textArea}
-                    placeholder="Enter task description..."
-                  />
-                ) : (
-                  <p className={`taskText ${isCompleted ? 'taskCompleted' : ''}`}>
-                    {currentData.task}
-                  </p>
-                )}
-              </div>
-
-              {/* Motivation */}
-              <div className="taskSection">
-                <div className="sectionTitle">
-                  {data.roadmapLabels?.motivationIcon || '💖'} {data.roadmapLabels?.motivationLabel || 'Motivation'}
-                </div>
-                {isEditing ? (
-                  <textarea
-                    value={currentData.motivation || ''}
-                    onChange={(e) => updateEditedData('motivation', e.target.value)}
-                    style={editStyles.textArea}
-                    placeholder="Enter motivation..."
-                  />
-                ) : (
-                  <p className="motivationText">{currentData.motivation}</p>
-                )}
-              </div>
-
-              {/* Google Calendar Link */}
-              {!isEditing && (
+              <div className="cardActions">
+                <button
+                  onClick={() => toggleTaskComplete(item.date)}
+                  className={`completeButton ${isCompleted ? 'completed' : ''}`}
+                >
+                  {isCompleted ? '✓ Completed' : 'Mark Complete'}
+                </button>
                 <a
-                  href={generateGoogleCalendarUrl(item)}
+                  href={generateGoogleCalendarUrl(item, data, completedTasks)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="googleCalendarLink"
-                  style={hoveredButton === `cal-${item.date}` ? { backgroundColor: '#bfdbfe' } : {}}
-                  onMouseEnter={() => setHoveredButton(`cal-${item.date}`)}
-                  onMouseLeave={() => setHoveredButton(null)}
+                  className="calendarButton"
                 >
-                  <span>{data.roadmapLabels?.calendarIcon || '🔗'}</span>
-                  {data.roadmapLabels?.addToGoogleCalendar || 'Add to Google Calendar'}
+                  Add to Calendar
                 </a>
-              )}
+              </div>
             </div>
           );
         })}
@@ -539,46 +444,26 @@ export default function Roadmap({ roadmapData }) {
 
       {/* Progress Summary */}
       <div className="progressContainer">
-        <h2 className="progressTitle">{data.roadmapLabels?.progressTitle || 'Progress Summary'}</h2>
-        <div className="progressBar">
-          <div className="progressBarTrack">
-            <div 
-              className="progressBarFill"
-              style={{ width: `${currentRoadmapData.length > 0 ? (completedTasks.size / currentRoadmapData.length) * 100 : 0}%` }}
-            ></div>
+        <h3>{data.roadmapLabels?.progressTitle || 'Progress Summary'}</h3>
+        <div className="progressStats">
+          <div className="stat">
+            <span className="statValue">{completedHours.toFixed(1)}</span>
+            <span className="statLabel">/{totalHours.toFixed(1)} {data.roadmapLabels?.hoursLabel || 'hours'}</span>
           </div>
-          <span className="progressText">
-            {completedTasks.size} {data.roadmapLabels?.ofLabel || 'of'} {currentRoadmapData.length} {data.roadmapLabels?.tasksCompleted || 'tasks completed'}
-          </span>
-        </div>
-        
-        {/* Time Statistics */}
-        <div className="timeStats">
-          <div className="statCard">
-            <div className="statValue">{totalHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div className="statLabel">{data.roadmapLabels?.totalHours || 'Total Hours'}</div>
+          <div className="stat">
+            <span className="statValue">{avgHoursPerDay.toFixed(1)}</span>
+            <span className="statLabel">{data.roadmapLabels?.avgHoursLabel || 'avg/day'}</span>
           </div>
-          <div className="statCard">
-            <div className="statValue">{completedHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div className="statLabel">{data.roadmapLabels?.completedHours || 'Completed Hours'}</div>
-          </div>
-          <div className="statCard">
-            <div className="statValue">{avgHoursPerDay.toFixed(1)}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div className="statLabel">{data.roadmapLabels?.avgHoursPerDay || 'Avg Hours/Day'}</div>
-          </div>
-          <div className="statCard">
-            <div className="statValue">{totalHours - completedHours}{data.roadmapLabels?.hoursShort || 'h'}</div>
-            <div className="statLabel">{data.roadmapLabels?.remainingHours || 'Remaining Hours'}</div>
+          <div className="stat">
+            <span className="statValue">{Math.round((completedHours / totalHours) * 100) || 0}%</span>
+            <span className="statLabel">{data.roadmapLabels?.completedLabel || 'completed'}</span>
           </div>
         </div>
       </div>
 
       {/* Info Box */}
       <div className="infoBox">
-        <h3 className="infoTitle">{data.roadmapLabels?.infoTitle || 'Enhanced Time Tracking'}</h3>
-        <p className="infoText">
-          {data.roadmapLabels?.infoText || 'The roadmap now includes detailed time management with start times, duration, and end times. Calendar exports include precise scheduling information. Click the edit icon (✏️) to modify any task details.'}
-        </p>
+        <p>{data.roadmapLabels?.infoText || 'Click on tasks to mark them as complete, or edit them to customize your schedule.'}</p>
       </div>
     </div>
   );

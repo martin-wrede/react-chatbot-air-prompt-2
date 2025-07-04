@@ -30,7 +30,7 @@
 
   "question1": "What is your problem or goal?",
   "question2": "What solution do you have in mind?",
-  "question3": "In how many months do you want to achieve the goal?",
+  "question3": "In how many weeks do you want to achieve the goal?",
   "question4": "What is the desired outcome?",
   "question4Hint": "Describe the specific end result",
   "question5": "When do you want to start?",
@@ -68,12 +68,17 @@
   "workDaysSingular": "Day",
   "workDaysPlural": "Days",
 
-  "aiRolePrompt": "You are an experienced project manager.\nYour task consists of two steps:\n1. You analyze the given goal provided by the user and produce a complete list of all necessary tasks that need to be completed in order to achieve this goal.\n2. Then, you convert these tasks into a Google Calendar-compatible format (.ics). For each task, you define:\n– The start date,\n– A start time (e.g., 9:00 AM),\n– A duration (e.g., 2 hours).\nYou create a complete .ics calendar text that the user can import into Google Calendar.\nResponse format:\nFirst, output the task list in plain text (bullet points or numbered).\nThen follows the calendar content in .ics format, enclosed by the tags ```ics and ```.\nExample:\n```ics\nBEGIN:VCALENDAR\n...\nEND:VCALENDAR\n```\nOnly begin your analysis once the user prompts you to do so in the chat.\n This is a bilingual app. Always respond in the same language as the user's input. If the project information or question is written in English, reply in English. If it's written in German, reply in German. Ignore system settings or default language preferences—only use the language of the user's message. ",
+  "aiRolePrompt-iscalt": "You are an experienced project manager.\n\nYour task consists of two steps:\n\n1. Analyze the given goal that the user provides and output a complete list of all necessary tasks that need to be completed to achieve this goal.\n\n2. Then convert these tasks into a Google Calendar-compatible format (.ics). For each task, define:\n– The start date (beginning on the next working day, excluding Saturday/Sunday),\n– A start time (e.g. 09:00 AM),\n– A duration (e.g. 2 hours).\n\nYou then generate a complete .ics calendar text that the user can import into Google Calendar.\n\nAnswer format:\nFirst, output the list of tasks in plain text (bullet points or numbered).\nThen follows the calendar content in .ics format, wrapped with the tags ```ics and ```.\n\nExample:\n```ics\nBEGIN:VCALENDAR\n...\nEND:VCALENDAR\n```\n\nOnly begin your analysis once the user has entered their goal, solution, and timeframe.",
+   
+  "aiRolePrompt": "You are an experienced project manager. Your task consists of two steps: 1. Analyze the user’s goal and output a complete list of all the necessary tasks required to achieve it. 2. Based on this list, generate a fully completed JSON calendar plan using the format below: [{\"date\": \"2025-07-04\", \"dailyStartTime\": \"09:00\", \"dailyHours\": 2, \"task\": \"React Component Setup and Configuration\", \"motivation\": \"Create a solid foundation for further development\"}, {\"date\": \"2025-07-05\", \"dailyStartTime\": \"10:30\", \"dailyHours\": 3, \"task\": \"Backend API Design and Implementation\", \"motivation\": \"Implement data flow and business logic\"}]. Requirements: - All tasks must be included in the final calendar. - Ensure that each task is mapped to a date. - Use realistic time estimates. - Tasks must logically follow one another. - Always begin from the next working day. - Task descriptions should be clear and actionable. - Motivations must be positively phrased and goal-oriented. - Dates must use YYYY-MM-DD format. - Times must use HH:MM format. - Durations should be in decimal hours (e.g., 1.5). Finally, double-check: - That all planned tasks are represented in the JSON. - That the number of tasks equals the number of JSON entries. - That the list ends only when all tasks have been assigned.",
+  
+  "aiRolePrompt2":  "Begin by listing the tasks.",
+  
   "promptTemplate": {
-    "problem": "\n\nProblem/Goal: ",
+    "problem": "\n\nProblem: ",
     "solution": "\nProposed Solution: ",
     "result": "\nDesired Outcome: ",
-    "period": "\nTimeframe (Days): ",
+    "period": "\nTimeframe (Weeks): ",
     "startDate": "\nStart Date: ",
     "dailyStartTime": "\nDaily Start Time: ",
     "dailyHours": "\nHours per Day: ",

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import Form from './components/Form';
 import Roadmap from './components/RoadmapEdit';
@@ -12,13 +11,17 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [gesamtPrompt, setGesamtPrompt] = useState("")
+
    const { data } = useContext(Context);
  
 // If you want to parse the URL of current page in browser:
 let params = new URLSearchParams(location.search);
+
 let part1 = params.get('part1');
 let part2 = params.get('part2');
 let part3 = params.get('part3');
+
+ 
 
 // State for roadmap data - starts with sample data
   const [roadmapData, setRoadmapData] = useState([
@@ -38,7 +41,9 @@ let part3 = params.get('part3');
     }
   ]);
  
+  
    const [roadmapToday, setRoadmapToday] = useState([]);
+
   // Get today's date in the correct format
   const today = new Date().toISOString().split('T')[0];
 
@@ -48,116 +53,7 @@ let part3 = params.get('part3');
   const todayTasks = roadmapData.filter(item => item.date === today);
   setRoadmapToday(todayTasks); // always update, even if empty
 }, [roadmapData]);
-
-  // NEW: Handler for updates made in the RoadmapEdit component
-  const handleRoadmapUpdate = (updatedData) => {
-    // The child component returns the complete, updated list of tasks.
-    // We sort it by date and set it as the new state.
-    updatedData.sort((a, b) => new Date(a.date) - new Date(b.date));
-    setRoadmapData(updatedData);
-  };
-
-  // NEW: Function to parse JSON content and convert to roadmap data format
-  const parseJsonToRoadmapData = (jsonContent) => {
-    try {
-      let parsedData;
-      
-      // Try to parse as JSON
-      if (typeof jsonContent === 'string') {
-        parsedData = JSON.parse(jsonContent);
-      } else {
-        parsedData = jsonContent;
-      }
-      
-      // Ensure it's an array
-      if (!Array.isArray(parsedData)) {
-        console.warn('JSON data is not an array, wrapping in array');
-        parsedData = [parsedData];
-      }
-      
-      // Validate and normalize each item
-      const validatedData = parsedData.map(item => {
-        // Validate required fields
-        if (!item.date || !item.task) {
-          console.warn('Missing required fields in JSON item:', item);
-          return null;
-        }
-        
-        // Normalize the data structure
-        return {
-          date: item.date,
-          task: item.task,
-          dailyStartTime: item.dailyStartTime || '09:00',
-          dailyHours: item.dailyHours || 2,
-          motivation: item.motivation || (data?.chat_defaultMotivation || 'Erreiche dein Ziel!')
-        };
-      }).filter(item => item !== null); // Remove invalid items
-      
-      // Sort by date
-      validatedData.sort((a, b) => new Date(a.date) - new Date(b.date));
-      
-      console.log(`Successfully parsed ${validatedData.length} tasks from JSON`);
-      return validatedData;
-      
-    } catch (error) {
-      console.error('Error parsing JSON content:', error);
-      return [];
-    }
-  };
-
-  // NEW: Function to extract JSON content from text (supports multiple formats)
-  const extractJsonContent = (text) => {
-    const jsonContents = [];
-    
-    // Pattern 1: JSON code blocks (```json ... ```)
-    const jsonCodeBlockRegex = /```json\s*\n([\s\S]*?)\n```/g;
-    let match;
-    
-    while ((match = jsonCodeBlockRegex.exec(text)) !== null) {
-      jsonContents.push(match[1]);
-    }
-    
-    // Pattern 2: Plain JSON arrays/objects (starting with [ or {)
-    const jsonObjectRegex = /(\[[\s\S]*?\]|\{[\s\S]*?\})/g;
-    const potentialJsonMatches = text.match(jsonObjectRegex);
-    
-    if (potentialJsonMatches) {
-      potentialJsonMatches.forEach(potentialJson => {
-        try {
-          // Try to parse to verify it's valid JSON
-          JSON.parse(potentialJson);
-          // Only add if it's not already captured by code block regex
-          if (!jsonContents.some(existing => existing.includes(potentialJson.trim()))) {
-            jsonContents.push(potentialJson);
-          }
-        } catch (e) {
-          // Not valid JSON, ignore
-        }
-      });
-    }
-    
-    return jsonContents;
-  };
-
-  // NEW: Function to create download link for JSON files
-  const createJsonDownloadLink = (jsonContent, filename = 'roadmap.json') => {
-    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    
-    return {
-      url,
-      filename,
-      download: () => {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }
-    };
-  };
+ 
 
   // Function to parse ICS content and convert to roadmap data format
   const parseIcsToRoadmapData = (icsContent) => {
@@ -250,7 +146,8 @@ let part3 = params.get('part3');
                 event.dailyHours = Math.max(1, Math.round(durationMinutes / 60));
               }
             }
-          }   
+          }
+          
           // Handle DURATION format
           if (line.startsWith('DURATION:PT')) {
             const durationStr = line.replace('DURATION:PT', '').trim();
@@ -296,13 +193,15 @@ let part3 = params.get('part3');
           // Set default values if missing
           if (!event.dailyStartTime) event.dailyStartTime = '09:00';
           if (!event.dailyHours) event.dailyHours = 2;
-          if (!event.motivation) event.motivation = data?.chat_defaultMotivation || 'Keep pushing towards your goal!';     
+          if (!event.motivation) event.motivation = data?.chat_defaultMotivation || 'Keep pushing towards your goal!';
+          
           events.push(event);
         }
       });
       
       // Sort events by date
-      events.sort((a, b) => new Date(a.date) - new Date(b.date));    
+      events.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
       return events;
     } catch (error) {
       console.error('Error parsing ICS content:', error);
@@ -312,7 +211,8 @@ let part3 = params.get('part3');
 
   // Helper function for formatting ICS dates
   const formatIcsDate = (icsDate) => {
-    if (!icsDate) return data?.chat_unknownDate || 'Unbekannt';    
+    if (!icsDate) return data?.chat_unknownDate || 'Unbekannt';
+    
     const year = icsDate.substring(0, 4);
     const month = icsDate.substring(4, 6);
     const day = icsDate.substring(6, 8);
@@ -356,10 +256,10 @@ let part3 = params.get('part3');
       const appointmentsText = data?.chat_appointments || 'Terminen';
       const originalContentText = data?.chat_originalIcsContent || 'Original ICS-Inhalt';
       
-      return `${calendarText} ${events.length} ${appointmentsText}:\n\n` +
-             events.map(event =>
+      return `${calendarText} ${events.length} ${appointmentsText}:\n\n` + 
+             events.map(event => 
                `- ${event.summary} (${formatIcsDate(event.start)})`
-             ).join('\n') +
+             ).join('\n') + 
              `\n\n${originalContentText}:\n${icsText}`;
     }
     
@@ -399,97 +299,47 @@ let part3 = params.get('part3');
     };
   };
 
-  // UPDATED: Function to process AI response and automatically import both ICS and JSON data
+  // COMPLETED: Function to process AI response and automatically import ICS data
   const processAIResponse = (content) => {
-    // Process ICS content
     const icsContents = extractIcsContent(content);
-    const icsDownloadLinks = [];
-    let icsImportedEvents = 0;
-    let allIcsEvents = [];
+    const downloadLinks = [];
+    let importedEvents = 0;
+    let allParsedEvents = [];
     
-    // Process JSON content
-    const jsonContents = extractJsonContent(content);
-    const jsonDownloadLinks = [];
-    let jsonImportedEvents = 0;
-    let allJsonEvents = [];
-    
-    // Handle ICS content
     if (icsContents.length > 0) {
+      // Process each ICS content
       icsContents.forEach((icsContent, index) => {
         const filename = `projekt-kalender-${index + 1}.ics`;
         const downloadLink = createIcsDownloadLink(icsContent, filename);
-        icsDownloadLinks.push(downloadLink);
+        downloadLinks.push(downloadLink);
         
+        // Parse ICS content to roadmap data
         const parsedEvents = parseIcsToRoadmapData(icsContent);
-        allIcsEvents = [...allIcsEvents, ...parsedEvents];
-        icsImportedEvents += parsedEvents.length;
+        allParsedEvents = [...allParsedEvents, ...parsedEvents];
+        importedEvents += parsedEvents.length;
       });
-    }
-    
-    // Handle JSON content
-    if (jsonContents.length > 0) {
-      jsonContents.forEach((jsonContent, index) => {
-        const filename = `projekt-roadmap-${index + 1}.json`;
-        const downloadLink = createJsonDownloadLink(jsonContent, filename);
-        jsonDownloadLinks.push(downloadLink);
+      
+      // Update roadmap data if we have parsed events
+      if (allParsedEvents.length > 0) {
+        setRoadmapData(allParsedEvents);
+        console.log(`Successfully imported ${importedEvents} events to roadmap`);
         
-        const parsedEvents = parseJsonToRoadmapData(jsonContent);
-        allJsonEvents = [...allJsonEvents, ...parsedEvents];
-        jsonImportedEvents += parsedEvents.length;
-      });
-    }
-    
-    // Update roadmap data - prefer JSON over ICS if both exist
-    const totalEvents = allJsonEvents.length + allIcsEvents.length;
-    if (totalEvents > 0) {
-      let finalEvents = [];
-      
-      if (allJsonEvents.length > 0) {
-        finalEvents = allJsonEvents;
-        console.log(`Successfully imported ${jsonImportedEvents} events from JSON to roadmap`);
-      } else if (allIcsEvents.length > 0) {
-        finalEvents = allIcsEvents;
-        console.log(`Successfully imported ${icsImportedEvents} events from ICS to roadmap`);
+        // Add a success message to the chat
+        setTimeout(() => {
+          const successMessage = data?.chat_autoImportSuccess || 'Automatisch {count} Termine in den Projektplan importiert! Scrolle nach unten, um den aktualisierten Plan zu sehen.';
+          setMessages(prev => [...prev, {
+            role: 'system',
+            content: `✅ ${successMessage.replace('{count}', importedEvents)}`
+          }]);
+        }, 1000);
       }
-      
-      // Combine and deduplicate if both exist
-      if (allJsonEvents.length > 0 && allIcsEvents.length > 0) {
-        const combinedEvents = [...allJsonEvents, ...allIcsEvents];
-        // Remove duplicates based on date and task
-        const uniqueEvents = combinedEvents.filter((event, index, self) =>
-          index === self.findIndex(e => e.date === event.date && e.task === event.task)
-        );
-        finalEvents = uniqueEvents;
-        console.log(`Combined ${uniqueEvents.length} unique events from JSON and ICS`);
-      }
-      
-      setRoadmapData(finalEvents);
-      
-      // Add success message
-      setTimeout(() => {
-        let successMessage = '';
-        if (allJsonEvents.length > 0 && allIcsEvents.length > 0) {
-          successMessage = `✅ ${jsonImportedEvents} JSON-Termine und ${icsImportedEvents} ICS-Termine automatisch importiert!`;
-        } else if (allJsonEvents.length > 0) {
-          successMessage = data?.chat_autoImportSuccessJson || 'Automatisch {count} JSON-Termine in den Projektplan importiert!';
-          successMessage = successMessage.replace('{count}', jsonImportedEvents);
-        } else {
-          successMessage = data?.chat_autoImportSuccess || 'Automatisch {count} Termine in den Projektplan importiert!';
-          successMessage = successMessage.replace('{count}', icsImportedEvents);
-        }
-        
-        setMessages(prev => [...prev, {
-          role: 'system',
-          content: successMessage + ' ' + (data?.chat_scrollDownToSee || 'Scrolle nach unten, um den aktualisierten Plan zu sehen.')
-        }]);
-      }, 1000);
     }
-    
-    const allDownloadLinks = [...icsDownloadLinks, ...jsonDownloadLinks];
     
     return {
-      originalContent: content,icsContents, jsonContents, downloadLinks: allDownloadLinks, icsDownloadLinks,
-      jsonDownloadLinks,   importedEvents: totalEvents,   icsImportedEvents,   jsonImportedEvents
+      originalContent: content,
+      icsContents,
+      downloadLinks,
+      importedEvents
     };
   };
 
@@ -522,26 +372,15 @@ let part3 = params.get('part3');
           // ICS content for display
           content = parseIcsContent(content);
         }
-        // JSON files
-        else if (file.name.endsWith('.json') || file.type === 'application/json') {
-          content = await file.text();
-          fileType = 'json';
-          
-          // Parse and import JSON content to roadmap
-          const parsedEvents = parseJsonToRoadmapData(content);
-          if (parsedEvents.length > 0) {
-            setRoadmapData(parsedEvents);
-            console.log(`Imported ${parsedEvents.length} events from uploaded JSON file`);
-          }
-        }
         else {
-          const errorMessage = data?.chat_unsupportedFileFormat || '{filename} ist kein unterstütztes Dateiformat. Nur .txt, .ics und .json Dateien sind erlaubt.';
+          const errorMessage = data?.chat_unsupportedFileFormat || '{filename} ist kein unterstütztes Dateiformat. Nur .txt und .ics Dateien sind erlaubt.';
           alert(errorMessage.replace('{filename}', file.name));
           continue;
         }
 
         const fileData = {
-          id: Date.now() + Math.random(), name: file.name,
+          id: Date.now() + Math.random(),
+          name: file.name,
           content: content,
           type: fileType,
           size: file.size,
@@ -555,6 +394,7 @@ let part3 = params.get('part3');
         alert(errorMessage.replace('{filename}', file.name));
       }
     }
+    
     event.target.value = '';
   };
 
@@ -599,20 +439,15 @@ let part3 = params.get('part3');
       const responseData = await response.json();
       const aiContent = responseData.choices?.[0]?.message?.content || (data?.chat_noResponseGenerated || 'Keine Antwort generiert.');
       
-      // Process the AI response for ICS and JSON content and auto-import
+      // Process the AI response for ICS content and auto-import
       const processedResponse = processAIResponse(aiContent);
 
       const assistantMessage = {
         role: 'assistant',
         content: processedResponse.originalContent,
         icsContents: processedResponse.icsContents,
-        jsonContents: processedResponse.jsonContents,
         downloadLinks: processedResponse.downloadLinks,
-        icsDownloadLinks: processedResponse.icsDownloadLinks,
-        jsonDownloadLinks: processedResponse.jsonDownloadLinks,
-        importedEvents: processedResponse.importedEvents,
-        icsImportedEvents: processedResponse.icsImportedEvents,
-        jsonImportedEvents: processedResponse.jsonImportedEvents
+        importedEvents: processedResponse.importedEvents
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -627,6 +462,7 @@ let part3 = params.get('part3');
       setIsLoading(false);
     }
   };
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -659,7 +495,13 @@ let part3 = params.get('part3');
       <br/>
       {gesamtPrompt && (
         <div style={{
-         padding: '10px', backgroundColor: '#f0f0f0', borderRadius: '5px', marginBottom: '10px',  fontSize: '12px',  maxHeight: '100px',  overflow: 'auto'
+          padding: '10px',
+          backgroundColor: '#f0f0f0',
+          borderRadius: '5px',
+          marginBottom: '10px',
+          fontSize: '12px',
+          maxHeight: '100px',
+          overflow: 'auto'
         }}>
           <strong>{data?.chat_activePromptLabel || 'Aktiver Prompt'}:</strong> {gesamtPrompt}
         </div>
@@ -668,6 +510,8 @@ let part3 = params.get('part3');
      
       {/* Chat Container All */}
       <div className="chat-container">
+    
+        
           <h2>{data && data.app_Headline2}</h2>
         {/* Chat Messages Container */}
         <div className="chat-container">
@@ -680,12 +524,12 @@ let part3 = params.get('part3');
               <div
                 key={index}
                 className={`message ${
-                  message.role === 'user' ? 'message-user' :
+                  message.role === 'user' ? 'message-user' : 
                   message.role === 'system' ? 'message-system' : 'message-assistant'
                 }`}
               >
                 <strong>
-                  {message.role === 'user' ? (data?.chat_youLabel || 'Du:') :
+                  {message.role === 'user' ? (data?.chat_youLabel || 'Du:') : 
                    message.role === 'system' ? (data?.chat_systemLabel || 'System:') : (data?.chat_aiLabel || 'AI:')}
                 </strong>
                 <div className="message-content">
@@ -694,30 +538,43 @@ let part3 = params.get('part3');
                 
                 {/* Import success indicator */}
                 {message.role === 'assistant' && message.importedEvents > 0 && (
-                  <div style={{ margin: '10px 0', padding: '8px 12px', backgroundColor: '#d4edda',   color: '#155724',   borderRadius: '6px', fontSize: '12px',   fontWeight: '500'
+                  <div style={{
+                    margin: '10px 0',
+                    padding: '8px 12px',
+                    backgroundColor: '#d4edda',
+                    color: '#155724',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '500'
                   }}>
-                    ✅ {message.jsonImportedEvents > 0 && message.icsImportedEvents > 0
-                      ? `${message.jsonImportedEvents} JSON-Termine und ${message.icsImportedEvents} ICS-Termine automatisch importiert`
-                      : message.jsonImportedEvents > 0
-                      ? (data?.chat_importedJsonToRoadmap || '{count} JSON-Termine automatisch in den Projektplan importiert').replace('{count}', message.jsonImportedEvents)
-                      : (data?.chat_importedToRoadmap || '{count} Termine automatisch in den Projektplan importiert').replace('{count}', message.icsImportedEvents)}
+                    ✅ {(data?.chat_importedToRoadmap || '{count} Termine automatisch in den Projektplan importiert').replace('{count}', message.importedEvents)}
                   </div>
                 )}
                 
-                {/* Download Links */}
+                {/* ICS Download Links */}
                 {message.role === 'assistant' && message.downloadLinks && message.downloadLinks.length > 0 && (
-                  <div className="download-links">
+                  <div className="ics-downloads">
                     <h4 style={{margin: '10px 0 5px 0', fontSize: '14px', color: '#666'}}>
-                      📄 {data?.chat_downloadFilesLabel || 'Download-Dateien:'}
+                      📅 {data?.chat_calendarFilesLabel || 'Kalender-Dateien:'}
                     </h4>
                     {message.downloadLinks.map((link, linkIndex) => (
                       <button
                         key={linkIndex}
                         onClick={link.download}
-                        className="download-button"
-                        // here starts the copy of old App.jsx  mw
-                        style={{  display: 'inline-flex', alignItems: 'center',  gap: '6px',   padding: '8px 12px',   margin: '4px 8px 4px 0',  backgroundColor: '#4CAF50',
-                          color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px',  fontWeight: '500'
+                        className="ics-download-button"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '8px 12px',
+                          margin: '4px 8px 4px 0',
+                          backgroundColor: '#4CAF50',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: '500'
                         }}
                         onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
                         onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
@@ -748,13 +605,13 @@ let part3 = params.get('part3');
               <input
                 type="file"
                 multiple
-                accept=".txt,.ics,.json,text/plain,text/calendar,application/json"
+                accept=".txt,.ics,text/plain,text/calendar"
                 onChange={handleFileUpload}
                 className="file-input"
               />
             </label>
             <span className="file-hint">
-              {data?.chat_fileHint || '.txt, .json und .ics Dateien erlaubt (werden automatisch importiert)'}
+              {data?.chat_fileHint || '.txt und .ics Dateien erlaubt (ICS-Dateien werden automatisch importiert)'}
             </span>
           </div>
 
@@ -823,31 +680,44 @@ let part3 = params.get('part3');
           </div>
 
         <div id="part2" style={{display:part2}}>
-               
+         {/*  
+           <Roadmap
+            roadmapData={roadmapToday}
+           /> 
+           */}
+         
+
+           
           {roadmapToday.length > 0 ? (
-            <Roadmap roadmapData={roadmapToday} isToday={true} />
+          <Roadmap roadmapData={roadmapToday} />
           ) : (
-            <div style={{padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic'
-            }}>
-            {(data?.chat_noTasksToday || 'Keine Aufgaben für heute! ({today})').replace('{today}', today)}
-        </div>
-          )}
+          <div style={{
+          padding: '20px',
+          textAlign: 'center',
+          color: '#666',
+          fontStyle: 'italic'
+          }}>
+          {(data?.chat_noTasksToday || 'Keine Aufgaben für heute! ({today})').replace('{today}', today)}
+       </div>
+)}
         </div>
 
-       <div id="part3" style={{ display:part3 }}>   
+
+
+        
+       
+       <div id="part3" style={{ display:part3 }}>
+        
           <h2>{data && data.app_Headline3}</h2>
-          <p style={{marginBottom: '15px'}}>
-            <strong>ℹ️ {data?.chat_infoLabel || 'Info'}:</strong>
-             
-            {(data?.chat_roadmapInfo 
-              || 'Der Projektplan wird automatisch aktualisiert, wenn die KI .ics- oder .json-Kalenderdaten erstellt. Aktuell werden {count} Termine angezeigt.'
-            ).replace('{count}', roadmapData.length)}
-          </p>
+       
+      
+         <strong>ℹ️ {data?.chat_infoLabel || 'Info'}:</strong> {data?.chat_roadmapInfo 
+          // || 'Der Projektplan wird automatisch aktualisiert, wenn die KI .ics-Kalender-Daten erstellt. Aktuell werden {count} Termine angezeigt.').replace('{count}', roadmapData.length)}
+     } <strong>{roadmapData.length}</strong>
         <Roadmap 
           roadmapData={roadmapData}
-          onRoadmapUpdate={handleRoadmapUpdate}
-        />
-       </div>
+          />
+            </div>
     </div>
   );
 }

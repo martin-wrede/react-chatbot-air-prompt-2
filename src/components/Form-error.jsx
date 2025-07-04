@@ -3,7 +3,7 @@ import { Context } from '../Context';
 
 export default function Form(props) {
   const [age, setAge] = useState(20);
-  const [gender, setGender ] = useState("männlich");
+  const [gender, setGender] = useState("männlich");
   const [country, setCountry] = useState("Deutschland");
 
   const { data, language } = useContext(Context); // ✅ Get language from context
@@ -59,9 +59,8 @@ export default function Form(props) {
       industry: formData.get("industry"),
     });
 
-   
     const AIRole = data.aiRolePrompt;
-    const AIROle2 = "Beginne die Aufgaben aufzulisten."; // data.aiRolePrompt2;
+    const AIROle2 = data.aiRolePrompt2;
 
     const workDaysString = workDays.map(dayId =>
       weekDays.find(day => day.id === dayId)?.label
@@ -77,7 +76,7 @@ export default function Form(props) {
       + data.promptTemplate.workDays + workDaysString
       + data.promptTemplate.industry + formData.get("industry");
 
-      const fullPrompt = AIRole + "\n\n" + prompt ; // + AIRole2;
+    const fullPrompt = AIRole + "\n\n" + prompt + AIRole2;
 
     console.log("Sending prompt to AI:", fullPrompt);
     console.log("Language passed to AI:", language);
@@ -226,7 +225,7 @@ export default function Form(props) {
       </form>
 
       <br />
-      {gesamtPrompt && (
+     {gesamtPrompt && (
         <div style={{ marginTop: "2rem", whiteSpace: "pre-wrap" }}>
           <strong>{language === "en" ? "AI Response:" : "Antwort der KI:"}</strong><br />
           {gesamtPrompt}
@@ -235,3 +234,4 @@ export default function Form(props) {
     </div>
   );
 }
+
