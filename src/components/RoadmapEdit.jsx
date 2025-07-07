@@ -1,4 +1,3 @@
-
 import React, { useState, useContext, useEffect } from 'react';
 import './Roadmap.css';
 import { Context } from '../Context';
@@ -32,6 +31,12 @@ const calculateEndTime = (startTime, hours) => {
   const endMinute = totalMinutes % 60;
   
   return `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+};
+
+// Helper function to format date for input field (YYYY-MM-DD)
+const formatDateForInput = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toISOString().split('T')[0];
 };
 
 // Helper function to generate ICS content
@@ -199,6 +204,16 @@ const editStyles = {
     width: '50px',
     textAlign: 'center'
   },
+  dateInput: {
+    padding: '2px 4px',
+    border: '1px solid #d1d5db',
+    borderRadius: '4px',
+    fontSize: '12px',
+    backgroundColor: 'white',
+    color: '#1f2937',
+    width: '120px',
+    textAlign: 'center'
+  },
   textArea: {
     padding: '8px 12px',
     border: '1px solid #d1d5db',
@@ -215,6 +230,12 @@ const editStyles = {
     display: 'flex',
     gap: '4px',
     alignItems: 'center'
+  },
+  editableDateContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '4px'
   }
 };
 
@@ -251,6 +272,7 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
   const startEditing = (task) => {
     setEditingTask(task.date);
     setEditedData({
+      date: task.date,
       dailyStartTime: task.dailyStartTime || '10:00',
       dailyHours: task.dailyHours || 1,
       task: task.task || '',
@@ -263,15 +285,26 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
     setEditedData({});
   };
 
-  const saveTask = (date) => {
-    const updatedTasks = localTasks.map(task =>
-      task.date === date
-        ? { ...task, ...editedData }
-        : task
-    );
+  const saveTask = (originalDate) => {
+    const updatedTasks = localTasks.map(task => {
+      if (task.date === originalDate) {
+        return { ...task, ...editedData };
+      }
+      return task;
+    });
     
     // Update the local state for immediate UI feedback
     setLocalTasks(updatedTasks);
+
+    // If the date changed, we need to update the completed tasks set
+    if (editedData.date !== originalDate) {
+      const newCompleted = new Set(completedTasks);
+      if (newCompleted.has(originalDate)) {
+        newCompleted.delete(originalDate);
+        newCompleted.add(editedData.date);
+      }
+      setCompletedTasks(newCompleted);
+    }
 
     // If the callback is provided, notify the parent component
     if (onRoadmapUpdate) {
@@ -338,9 +371,22 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
             >
               <div className="cardHeader">
                 <div className="dateInfo">
-                  <div className="dayName">{dateInfo.dayName}</div>
-                  <div className="day">{dateInfo.day}</div>
-                  <div className="monthYear">{dateInfo.month} {dateInfo.year}</div>
+                  {isEditing ? (
+                    <div style={editStyles.editableDateContainer}>
+                      <input
+                        type="date"
+                        value={formatDateForInput(currentData.date)}
+                        onChange={(e) => updateEditedData('date', e.target.value)}
+                        style={editStyles.dateInput}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="dayName">{dateInfo.dayName}</div>
+                      <div className="day">{dateInfo.day}</div>
+                      <div className="monthYear">{dateInfo.month} {dateInfo.year}</div>
+                    </>
+                  )}
                 </div>
                 <button
                      onClick={() => toggleTaskComplete(item.date)}
@@ -511,7 +557,7 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
       {/* Info Box */}
       <div className="infoBox">
         <div className="infoTitle">{data.roadmapLabels?.infoTitle || 'How to use this roadmap'}</div>
-        <div className="infoText">{data.roadmapLabels?.infoText || 'Click on tasks to mark them as complete, or edit them to customize your schedule.'}</div>
+        <div className="infoText">{data.roadmapLabels?.infoText || 'Click on tasks to mark them as complete, or edit them to customize your schedule and dates.'}</div>
       </div>
     </div>
   );
