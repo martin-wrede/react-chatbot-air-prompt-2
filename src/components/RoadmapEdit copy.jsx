@@ -664,23 +664,7 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
                         ✎
                       </button>
                       
-                <button // toggle task complete
-                  onClick={() => toggleTaskComplete(item.date)}
-                  style={{
-                    ...editStyles.completeButton,
-                    ...(isCompleted ? editStyles.completeButtonActive : editStyles.completeButtonInactive),
-                  }}
-                >
-                  {isCompleted ? (
-                    <span role="img" aria-label="Task completed">
-                      ✅
-                    </span>
-                  ) : (
-                    <span role="img" aria-label="Task incomplete">
-                      ⭕
-                    </span>
-                  )}
-                </button>
+           
                      
                     </>
                   )}
