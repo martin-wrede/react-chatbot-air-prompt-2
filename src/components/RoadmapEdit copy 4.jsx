@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import './Roadmap.css';
+import './RoadmapEdit.css'; // Import the new CSS file
 import { Context } from '../Context';
 
 // Helper functions
@@ -115,218 +116,6 @@ const generateGoogleCalendarUrl = (task, data, completedTasks) => {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 };
 
-// CSS styles as JavaScript object for edit mode
-const editStyles = {
-  editButton: {
-    padding: '6px',
-    backgroundColor: 'transparent',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    color: '#6b7280',
-    transition: 'all 0.2s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  editButtonHover: {
-    backgroundColor: '#f3f4f6',
-    color: '#4f46e5'
-  },
-  saveButton: {
-    padding: '6px',
-    backgroundColor: '#dcfce7',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    color: '#059669',
-    transition: 'all 0.2s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  deleteButton: {
-    padding: '6px',
-    backgroundColor: '#fef2f2',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    color: '#dc2626',
-    transition: 'all 0.2s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  cancelButton: {
-    padding: '6px',
-    backgroundColor: '#fef2f2',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    color: '#dc2626',
-    transition: 'all 0.2s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  editInput: {
-    padding: '4px 8px',
-    border: '1px solid #d1d5db',
-    borderRadius: '4px',
-    fontSize: '14px',
-    backgroundColor: 'white',
-    color: '#1f2937',
-    width: '100%'
-  },
-  completeButton: {
-    padding: '6px',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  completeButtonActive: {
-    backgroundColor: '#dcfce7',
-    color: '#059669'
-  },
-  completeButtonInactive: {
-    backgroundColor: '#f3f4f6',
-    color: '#6b7280'
-  },
-  timeInput: {
-    padding: '2px 4px',
-    border: '1px solid #d1d5db',
-    borderRadius: '4px',
-    fontSize: '12px',
-    backgroundColor: 'white',
-    color: '#1f2937',
-    width: '60px',
-    textAlign: 'center'
-  },
-  numberInput: {
-    padding: '2px 4px',
-    border: '1px solid #d1d5db',
-    borderRadius: '4px',
-    fontSize: '12px',
-    backgroundColor: 'white',
-    color: '#1f2937',
-    width: '50px',
-    textAlign: 'center'
-  },
-  dateInput: {
-    padding: '2px 4px',
-    border: '1px solid #d1d5db',
-    borderRadius: '4px',
-    fontSize: '12px',
-    backgroundColor: 'white',
-    color: '#1f2937',
-    width: '120px',
-    textAlign: 'center'
-  },
-  textArea: {
-    padding: '8px 12px',
-    border: '1px solid #d1d5db',
-    borderRadius: '6px',
-    fontSize: '14px',
-    backgroundColor: 'white',
-    color: '#1f2937',
-    width: '100%',
-    resize: 'vertical',
-    minHeight: '60px',
-    fontFamily: 'inherit'
-  },
-  buttonContainer: {
-    display: 'flex',
-    gap: '4px',
-    alignItems: 'center'
-  },
-  editableDateContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '4px'
-  },
-  // Confirmation Dialog Styles
-  confirmationOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000
-  },
-  confirmationDialog: {
-    backgroundColor: 'white',
-    padding: '24px',
-    borderRadius: '12px',
-    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-    maxWidth: '400px',
-    width: '90%',
-    textAlign: 'center'
-  },
-  confirmationTitle: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: '8px'
-  },
-  confirmationMessage: {
-    fontSize: '14px',
-    color: '#6b7280',
-    marginBottom: '20px',
-    lineHeight: '1.5'
-  },
-  confirmationTaskPreview: {
-    fontSize: '13px',
-    color: '#374151',
-    backgroundColor: '#f9fafb',
-    padding: '8px 12px',
-    borderRadius: '6px',
-    marginBottom: '20px',
-    fontStyle: 'italic'
-  },
-  confirmationButtons: {
-    display: 'flex',
-    gap: '12px',
-    justifyContent: 'center'
-  },
-  confirmButton: {
-    padding: '10px 20px',
-    backgroundColor: '#dc2626',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    transition: 'all 0.2s ease'
-  },
-  confirmButtonHover: {
-    backgroundColor: '#b91c1c'
-  },
-  cancelConfirmButton: {
-    padding: '10px 20px',
-    backgroundColor: '#f3f4f6',
-    color: '#374151',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    transition: 'all 0.2s ease'
-  },
-  cancelConfirmButtonHover: {
-    backgroundColor: '#e5e7eb'
-  }
-};
-
 // Main Roadmap Component
 export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
   const { data } = useContext(Context);
@@ -338,8 +127,6 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
   
   // Confirmation dialog state
   const [confirmationDialog, setConfirmationDialog] = useState(null);
-  const [confirmButtonHover, setConfirmButtonHover] = useState(false);
-  const [cancelButtonHover, setCancelButtonHover] = useState(false);
 
   // This hook ensures the component updates if the parent's data changes
   useEffect(() => {
@@ -490,37 +277,27 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
     <div className="container">
       {/* Confirmation Dialog */}
       {confirmationDialog && (
-        <div style={editStyles.confirmationOverlay} onClick={cancelDelete}>
-          <div style={editStyles.confirmationDialog} onClick={(e) => e.stopPropagation()}>
-            <div style={editStyles.confirmationTitle}>
+        <div className="confirmation-overlay" onClick={cancelDelete}>
+          <div className="confirmation-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="confirmation-title">
               {data.roadmapLabels?.deleteConfirmTitle || 'Delete Task?'}
             </div>
-            <div style={editStyles.confirmationMessage}>
+            <div className="confirmation-message">
               {data.roadmapLabels?.deleteConfirmMessage || 'Are you sure you want to delete this task? This action cannot be undone.'}
             </div>
-            <div style={editStyles.confirmationTaskPreview}>
+            <div className="confirmation-task-preview">
               "{confirmationDialog.task.task}"
             </div>
-            <div style={editStyles.confirmationButtons}>
+            <div className="confirmation-buttons">
               <button
                 onClick={confirmDelete}
-                style={{
-                  ...editStyles.confirmButton,
-                  ...(confirmButtonHover ? editStyles.confirmButtonHover : {})
-                }}
-                onMouseEnter={() => setConfirmButtonHover(true)}
-                onMouseLeave={() => setConfirmButtonHover(false)}
+                className="confirm-button"
               >
                 {data.roadmapLabels?.deleteConfirmYes || 'Yes, Delete'}
               </button>
               <button
                 onClick={cancelDelete}
-                style={{
-                  ...editStyles.cancelConfirmButton,
-                  ...(cancelButtonHover ? editStyles.cancelConfirmButtonHover : {})
-                }}
-                onMouseEnter={() => setCancelButtonHover(true)}
-                onMouseLeave={() => setCancelButtonHover(false)}
+                className="cancel-confirm-button"
               >
                 {data.roadmapLabels?.deleteConfirmNo || 'Cancel'}
               </button>
@@ -557,12 +334,12 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
               <div className="cardHeader">
                 <div className="dateInfo">
                   {isEditing ? (
-                    <div style={editStyles.editableDateContainer}>
+                    <div className="editable-date-container">
                       <input
                         type="date"
                         value={formatDateForInput(currentData.date)}
                         onChange={(e) => updateEditedData('date', e.target.value)}
-                        style={editStyles.dateInput}
+                        className="date-input"
                       />
                     </div>
                   ) : (
@@ -574,37 +351,25 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
                   )}
                 </div>
                          
-                <button // toggle task complete
+                <button
                   onClick={() => toggleTaskComplete(item.date)}
-                  style={{
-                    ...editStyles.completeButton,
-                    ...(isCompleted ? editStyles.completeButtonActive : editStyles.completeButtonInactive),
-                  }}
+                  className={`complete-button-edit ${isCompleted ? 'active' : 'inactive'}`}
                 >
                   {isCompleted ? (
-                    <span role="img" aria-label="Task completed">
-                      ✅
-                    </span>
+                    <span role="img" aria-label="Task completed">✅</span>
                   ) : (
-                    <span role="img" aria-label="Task incomplete">
-                      ⭕
-                    </span>
+                    <span role="img" aria-label="Task incomplete">⭕</span>
                   )}
                 </button>
-                        <button // show delete
-                        onClick={() => showDeleteConfirmation(item.date)}
-                        style={{
-                          ...editStyles.deleteButton,
-                          ...(hoveredButton === `delete-${item.date}` ? editStyles.deleteButtonHover : {}),
-                          marginLeft: '4px'
-                        }}
-                        onMouseEnter={() => setHoveredButton(`delete-${item.date}`)}
-                        onMouseLeave={() => setHoveredButton(null)}
-                        title="Delete"
-                      >
-                        🗑️
-                      </button>
-                 
+                
+                <button
+                  onClick={() => showDeleteConfirmation(item.date)}
+                  className="delete-button"
+                  style={{ marginLeft: '4px' }}
+                  title="Delete"
+                >
+                  🗑️
+                </button>
               </div>
 
               <div className="timeSection">
@@ -615,7 +380,7 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
                       type="time"
                       value={currentData.dailyStartTime || '10:00'}
                       onChange={(e) => updateEditedData('dailyStartTime', e.target.value)}
-                      style={editStyles.timeInput}
+                      className="time-input"
                     />
                   ) : (
                     <div className="timeValue">{currentData.dailyStartTime || '10:00'}</div>
@@ -628,16 +393,16 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
                 <div className="timeInfo">
                   <div className="timeLabel">{data.roadmapLabels?.durationLabel || 'DURATION'}</div>
                   {isEditing ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div className="duration-input-container">
                       <input
                         type="number"
                         value={currentData.dailyHours || 1}
                         onChange={(e) => updateEditedData('dailyHours', parseFloat(e.target.value) || 1)}
-                        style={editStyles.numberInput}
+                        className="number-input"
                         min="0.5"
                         step="0.5"
                       />
-                      <span style={{ fontSize: '11px', color: '#6b7280' }}>h</span>
+                      <span>h</span>
                     </div>
                   ) : (
                     <div className="timeValue">{currentData.dailyHours || 1}h</div>
@@ -652,50 +417,37 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
                     <>
                       <button
                         onClick={() => startEditing(item)}
-                        style={{
-                          ...editStyles.editButton,
-                          ...(hoveredButton === `edit-${item.date}` ? editStyles.editButtonHover : {}),
-                          marginLeft: '8px'
-                        }}
-                        onMouseEnter={() => setHoveredButton(`edit-${item.date}`)}
-                        onMouseLeave={() => setHoveredButton(null)}
+                        className="edit-button"
+                        style={{ marginLeft: '8px' }}
                         title="Edit"
                       >
                         ✎
                       </button>
                       
-                <button // toggle task complete
-                  onClick={() => toggleTaskComplete(item.date)}
-                  style={{
-                    ...editStyles.completeButton,
-                    ...(isCompleted ? editStyles.completeButtonActive : editStyles.completeButtonInactive),
-                  }}
-                >
-                  {isCompleted ? (
-                    <span role="img" aria-label="Task completed">
-                      ✅
-                    </span>
-                  ) : (
-                    <span role="img" aria-label="Task incomplete">
-                      ⭕
-                    </span>
-                  )}
-                </button>
-                     
+                      <button
+                        onClick={() => toggleTaskComplete(item.date)}
+                        className={`complete-button-edit ${isCompleted ? 'active' : 'inactive'}`}
+                      >
+                        {isCompleted ? (
+                          <span role="img" aria-label="Task completed">✅</span>
+                        ) : (
+                          <span role="img" aria-label="Task incomplete">⭕</span>
+                        )}
+                      </button>
                     </>
                   )}
                   {isEditing && (
-                    <div style={{ ...editStyles.buttonContainer, marginLeft: '8px' }}>
+                    <div className="button-container" style={{ marginLeft: '8px' }}>
                       <button
                         onClick={() => saveTask(item.date)}
-                        style={editStyles.saveButton}
+                        className="save-button"
                         title="Save"
                       >
                         ✓
                       </button>
                       <button
                         onClick={cancelEditing}
-                        style={editStyles.cancelButton}
+                        className="cancel-button"
                         title="Cancel"
                       >
                         ✕
@@ -708,7 +460,7 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
                     type="text"
                     value={currentData.task || ''}
                     onChange={(e) => updateEditedData('task', e.target.value)}
-                    style={editStyles.editInput}
+                    className="edit-input"
                     placeholder="Task description"
                   />
                 ) : (
@@ -724,7 +476,7 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
                   <textarea
                     value={currentData.motivation || ''}
                     onChange={(e) => updateEditedData('motivation', e.target.value)}
-                    style={editStyles.textArea}
+                    className="text-area"
                     placeholder="Motivation..."
                   />
                 ) : (
