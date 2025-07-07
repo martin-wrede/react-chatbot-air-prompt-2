@@ -1,3 +1,4 @@
+
 import React, { useState, useContext, useEffect } from 'react';
 import './Roadmap.css';
 import { Context } from '../Context';
@@ -159,6 +160,24 @@ const editStyles = {
     backgroundColor: 'white',
     color: '#1f2937',
     width: '100%'
+  },
+   completeButton: {
+    padding: '6px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+   completeButtonActive: {
+    backgroundColor: '#dcfce7',
+    color: '#059669'
+  },
+  completeButtonInactive: {
+    backgroundColor: '#f3f4f6',
+    color: '#6b7280'
   },
   timeInput: {
     padding: '2px 4px',
@@ -324,11 +343,22 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
                   <div className="monthYear">{dateInfo.month} {dateInfo.year}</div>
                 </div>
                 <button
-                  onClick={() => toggleTaskComplete(item.date)}
-                  className={`completeButton ${isCompleted ? 'completeButtonActive' : 'completeButtonInactive'}`}
-                >
-                  {isCompleted ? '✓' : '○'}
-                </button>
+                     onClick={() => toggleTaskComplete(item.date)}
+                     style={{
+                      ...editStyles.completeButton,
+                      ...(isCompleted ? editStyles.completeButtonActive : editStyles.completeButtonInactive),
+                     }}
+                  >
+                     {isCompleted ? (
+                      <span role="img" aria-label="Task completed">
+                        ✅
+                      </span>
+                     ) : (
+                      <span role="img" aria-label="Task incomplete">
+                        ⭕
+                      </span>
+                     )}
+                   </button>
               </div>
 
               <div className="timeSection">

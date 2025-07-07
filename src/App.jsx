@@ -1,7 +1,9 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import Form from './components/Form';
-import Roadmap from './components/RoadmapEdit';
+ import Roadmap from './components/RoadmapEdit';
+// import Roadmap from './components/Roadmap';
+
 import { Context } from './Context';
 import { Upload, X, File, Download } from 'lucide-react';
 import './App.css';
@@ -34,7 +36,7 @@ let part3 = params.get('part3');
       task: 'Recherchiere 3 Landing Pages und schreib auf, was funktioniert.',
       dailyStartTime: '10:00',
       dailyHours: 6,
-      motivation: 'Freunde anrufen'
+      motivation: 'Freunde anrufenroad'
     }
   ]);
  

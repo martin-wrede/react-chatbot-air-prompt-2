@@ -294,9 +294,12 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
     <div className="container">
       {/* Header */}
       <div className="header">
-        <h1 className="title">{data.roadmapLabels?.title || 'Roadmap'}</h1>
-        <button onClick={downloadICS} className="downloadButton">
-          {data.roadmapLabels?.downloadICS || 'Download ICS'}
+        <div className="headerTitle">
+          <h1 className="title">{data.roadmapLabels?.title || 'Roadmap'}</h1>
+        </div>
+        <p className="subtitle">{data.roadmapLabels?.subtitle || 'Your personalized learning roadmap'}</p>
+        <button onClick={downloadICS} className="exportButton">
+          📅 {data.roadmapLabels?.downloadICS || 'Download ICS'}
         </button>
       </div>
 
@@ -314,80 +317,40 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
               key={item.date}
               className={`card ${isCompleted ? 'cardCompleted' : ''}`}
             >
-              <div className="dateHeader">
+              <div className="cardHeader">
                 <div className="dateInfo">
-                  <span className="dayName">{dateInfo.dayName}</span>
-                  <span className="dateNumber">{dateInfo.day}</span>
-                  <span className="month">{dateInfo.month}</span>
+                  <div className="dayName">{dateInfo.dayName}</div>
+                  <div className="day">{dateInfo.day}</div>
+                  <div className="monthYear">{dateInfo.month} {dateInfo.year}</div>
                 </div>
-                <div className="timeInfo">
-                  {isEditing ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <input
-                        type="time"
-                        value={currentData.dailyStartTime || '10:00'}
-                        onChange={(e) => updateEditedData('dailyStartTime', e.target.value)}
-                        style={editStyles.timeInput}
-                      />
-                      <span>-</span>
-                      <span style={{ fontSize: '12px', color: '#6b7280' }}>{endTime}</span>
-                    </div>
-                  ) : (
-                    <span className="time">{currentData.dailyStartTime || '10:00'} - {endTime}</span>
-                  )}
-                </div>
+                <button
+                  onClick={() => toggleTaskComplete(item.date)}
+                  className={`completeButton ${isCompleted ? 'completeButtonActive' : 'completeButtonInactive'}`}
+                >
+                  {isCompleted ? '✓' : '○'}
+                </button>
               </div>
 
-              <div className="taskContent">
-                <div className="taskHeader">
+              <div className="timeSection">
+                <div className="timeInfo">
+                  <div className="timeLabel">{data.roadmapLabels?.startTimeLabel || 'START TIME'}</div>
                   {isEditing ? (
                     <input
-                      type="text"
-                      value={currentData.task || ''}
-                      onChange={(e) => updateEditedData('task', e.target.value)}
-                      style={editStyles.editInput}
-                      placeholder="Task description"
+                      type="time"
+                      value={currentData.dailyStartTime || '10:00'}
+                      onChange={(e) => updateEditedData('dailyStartTime', e.target.value)}
+                      style={editStyles.timeInput}
                     />
                   ) : (
-                    <h3 className="taskTitle">{currentData.task}</h3>
+                    <div className="timeValue">{currentData.dailyStartTime || '10:00'}</div>
                   )}
-                  
-                  <div className="taskActions">
-                    {isEditing ? (
-                      <div style={editStyles.buttonContainer}>
-                        <button
-                          onClick={() => saveTask(item.date)}
-                          style={editStyles.saveButton}
-                          title="Save"
-                        >
-                          ✓
-                        </button>
-                        <button
-                          onClick={cancelEditing}
-                          style={editStyles.cancelButton}
-                          title="Cancel"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => startEditing(item)}
-                        style={{
-                          ...editStyles.editButton,
-                          ...(hoveredButton === `edit-${item.date}` ? editStyles.editButtonHover : {})
-                        }}
-                        onMouseEnter={() => setHoveredButton(`edit-${item.date}`)}
-                        onMouseLeave={() => setHoveredButton(null)}
-                        title="Edit"
-                      >
-                        ✎
-                      </button>
-                    )}
-                  </div>
                 </div>
-
-                <div className="duration">
+                <div className="timeInfo">
+                  <div className="timeLabel">{data.roadmapLabels?.endTimeLabel || 'END TIME'}</div>
+                  <div className="timeValue">{endTime}</div>
+                </div>
+                <div className="timeInfo">
+                  <div className="timeLabel">{data.roadmapLabels?.durationLabel || 'DURATION'}</div>
                   {isEditing ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <input
@@ -398,45 +361,88 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
                         min="0.5"
                         step="0.5"
                       />
-                      <span style={{ fontSize: '12px', color: '#6b7280' }}>
-                        {data.roadmapLabels?.hoursLabel || 'hours'}
-                      </span>
+                      <span style={{ fontSize: '11px', color: '#6b7280' }}>h</span>
                     </div>
                   ) : (
-                    <span>{currentData.dailyHours || 1} {data.roadmapLabels?.hoursLabel || 'hours'}</span>
-                  )}
-                </div>
-
-                <div className="motivation">
-                  {isEditing ? (
-                    <textarea
-                      value={currentData.motivation || ''}
-                      onChange={(e) => updateEditedData('motivation', e.target.value)}
-                      style={editStyles.textArea}
-                      placeholder="Motivation..."
-                    />
-                  ) : (
-                    <p>{currentData.motivation}</p>
+                    <div className="timeValue">{currentData.dailyHours || 1}h</div>
                   )}
                 </div>
               </div>
 
-              <div className="cardActions">
-                <button
-                  onClick={() => toggleTaskComplete(item.date)}
-                  className={`completeButton ${isCompleted ? 'completed' : ''}`}
-                >
-                  {isCompleted ? '✓ Completed' : 'Mark Complete'}
-                </button>
-                <a
-                  href={generateGoogleCalendarUrl(item, data, completedTasks)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="calendarButton"
-                >
-                  Add to Calendar
-                </a>
+              <div className="taskSection">
+                <div className="sectionTitle">
+                  {data.roadmapLabels?.taskLabel || 'TASK'}
+                  {!isEditing && (
+                    <button
+                      onClick={() => startEditing(item)}
+                      style={{
+                        ...editStyles.editButton,
+                        ...(hoveredButton === `edit-${item.date}` ? editStyles.editButtonHover : {}),
+                        marginLeft: '8px'
+                      }}
+                      onMouseEnter={() => setHoveredButton(`edit-${item.date}`)}
+                      onMouseLeave={() => setHoveredButton(null)}
+                      title="Edit"
+                    >
+                      ✎
+                    </button>
+                  )}
+                  {isEditing && (
+                    <div style={{ ...editStyles.buttonContainer, marginLeft: '8px' }}>
+                      <button
+                        onClick={() => saveTask(item.date)}
+                        style={editStyles.saveButton}
+                        title="Save"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        style={editStyles.cancelButton}
+                        title="Cancel"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={currentData.task || ''}
+                    onChange={(e) => updateEditedData('task', e.target.value)}
+                    style={editStyles.editInput}
+                    placeholder="Task description"
+                  />
+                ) : (
+                  <div className={`taskText ${isCompleted ? 'taskCompleted' : ''}`}>
+                    {currentData.task}
+                  </div>
+                )}
               </div>
+
+              <div className="taskSection">
+                <div className="sectionTitle">{data.roadmapLabels?.motivationLabel || 'MOTIVATION'}</div>
+                {isEditing ? (
+                  <textarea
+                    value={currentData.motivation || ''}
+                    onChange={(e) => updateEditedData('motivation', e.target.value)}
+                    style={editStyles.textArea}
+                    placeholder="Motivation..."
+                  />
+                ) : (
+                  <div className="motivationText">{currentData.motivation}</div>
+                )}
+              </div>
+
+              <a
+                href={generateGoogleCalendarUrl(item, data, completedTasks)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="googleCalendarLink"
+              >
+                📅 {data.roadmapLabels?.addToCalendar || 'Add to Google Calendar'}
+              </a>
             </div>
           );
         })}
@@ -444,26 +450,38 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
 
       {/* Progress Summary */}
       <div className="progressContainer">
-        <h3>{data.roadmapLabels?.progressTitle || 'Progress Summary'}</h3>
-        <div className="progressStats">
-          <div className="stat">
-            <span className="statValue">{completedHours.toFixed(1)}</span>
-            <span className="statLabel">/{totalHours.toFixed(1)} {data.roadmapLabels?.hoursLabel || 'hours'}</span>
+        <h3 className="progressTitle">{data.roadmapLabels?.progressTitle || 'Progress Summary'}</h3>
+        <div className="progressBar">
+          <div className="progressBarTrack">
+            <div 
+              className="progressBarFill"
+              style={{ width: `${Math.round((completedHours / totalHours) * 100) || 0}%` }}
+            />
           </div>
-          <div className="stat">
-            <span className="statValue">{avgHoursPerDay.toFixed(1)}</span>
-            <span className="statLabel">{data.roadmapLabels?.avgHoursLabel || 'avg/day'}</span>
+          <div className="progressText">
+            {Math.round((completedHours / totalHours) * 100) || 0}% {data.roadmapLabels?.completedLabel || 'completed'}
           </div>
-          <div className="stat">
-            <span className="statValue">{Math.round((completedHours / totalHours) * 100) || 0}%</span>
-            <span className="statLabel">{data.roadmapLabels?.completedLabel || 'completed'}</span>
+        </div>
+        <div className="timeStats">
+          <div className="statCard">
+            <div className="statValue">{completedHours.toFixed(1)}</div>
+            <div className="statLabel">{data.roadmapLabels?.completedHoursLabel || 'Hours Completed'}</div>
+          </div>
+          <div className="statCard">
+            <div className="statValue">{totalHours.toFixed(1)}</div>
+            <div className="statLabel">{data.roadmapLabels?.totalHoursLabel || 'Total Hours'}</div>
+          </div>
+          <div className="statCard">
+            <div className="statValue">{avgHoursPerDay.toFixed(1)}</div>
+            <div className="statLabel">{data.roadmapLabels?.avgHoursLabel || 'Avg Hours/Day'}</div>
           </div>
         </div>
       </div>
 
       {/* Info Box */}
       <div className="infoBox">
-        <p>{data.roadmapLabels?.infoText || 'Click on tasks to mark them as complete, or edit them to customize your schedule.'}</p>
+        <div className="infoTitle">{data.roadmapLabels?.infoTitle || 'How to use this roadmap'}</div>
+        <div className="infoText">{data.roadmapLabels?.infoText || 'Click on tasks to mark them as complete, or edit them to customize your schedule.'}</div>
       </div>
     </div>
   );
