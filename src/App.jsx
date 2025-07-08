@@ -111,35 +111,38 @@ function App() {
     }
     event.target.value = ''; // Reset file input
   };
-  
- const sendMessage = async () => {
+  // start sendmessage
+ 
+  const sendMessage = async () => {
     if (!inputMessage.trim() && uploadedFiles.length === 0) return;
 
     const fileContext = uploadedFiles.map(f => `[Datei: ${f.name}]\n${f.content}`).join('\n\n---\n\n');
     const messageContent = `${inputMessage}\n\n${fileContext}`.trim();
     const userMessage = { role: 'user', content: messageContent };
     
+    // The conversation history to be sent to the AI.
+    // It should be the messages state BEFORE adding the new user message.
+    // THIS LINE WAS MISSING.
+    const conversatsionHistory = [...messages]; 
+
     // Add user message to the local state for immediate display
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
 
     try {
-      const response = await fetch('/ai', {
+      const response = await fetch('/ai', { // This URL is correct.
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-         // --- THIS IS THE FIX ---
-        // Reconstruct the body to match what the backend expects
         body: JSON.stringify({
-          message: messageContent, // The full content of the new message
-          messages: conversationHistory, // The history *before* the new message
-          files: uploadedFiles, // The uploaded files array
-          prompt: gesamtPrompt, // You can still send the prompt if your backend handles it
+          message: messageContent,
+          messages: conversationHistory, // Now this variable exists.
+          files: uploadedFiles,
+          prompt: gesamtPrompt,
         }),
       });
-      // --- END OF FIX ---
+      
        if (!response.ok) {
-        // Handle non-2xx responses
         throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
       }
 
@@ -149,14 +152,19 @@ function App() {
       const processed = processAIResponse(aiContent);
       const assistantMessage = { role: 'assistant', ...processed };
 
+      // We already added the user's message, now we add the assistant's
       setMessages(prev => [...prev, assistantMessage]);
-         } catch (error) {
+
+    } catch (error) {
       console.error("Error sending message:", error);
+      // If you open the browser console (F12), you would see the ReferenceError here.
       setMessages(prev => [...prev, { role: 'assistant', content: 'Fehler bei der Verarbeitung Ihrer Anfrage.' }]);
     } finally {
       setIsLoading(false);
     }
   };
+  // end sendmessage
+
 
   const deleteFile = (fileId) => {
     setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
