@@ -44,8 +44,7 @@ let part3 = params.get('part3');
   // Get today's date in the correct format
   // Get today's date in the correct format
   const today = new Date().toISOString().split('T')[0];
- 
-  
+
   // Add this useEffect to update with real today's data
   useEffect(() => {
   const today = new Date().toISOString().split('T')[0];
@@ -826,7 +825,7 @@ let part3 = params.get('part3');
       </div>
       {/* END OF PART 1 /////////////////////////////////////////////////////////////// */}
           </div>
- 
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         <div id="part2" 
         //  style={{display:'block'}} 
          // 
@@ -834,8 +833,7 @@ let part3 = params.get('part3');
         >
                
           {roadmapToday.length > 0 ? (
-            <Roadmap    titleDisplay2='block' titleDisplay3='none'
-           roadmapData={roadmapToday} isToday={true} />
+            <Roadmap roadmapData={roadmapToday} isToday={true} />
           ) : (
             <div style={{padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic'
             }}>
@@ -856,8 +854,6 @@ let part3 = params.get('part3');
         <Roadmap 
           roadmapData={roadmapData}
           onRoadmapUpdate={handleRoadmapUpdate}
-          titleDisplay2='none'
-          titleDisplay3='block'
         />
        </div>
     </div>

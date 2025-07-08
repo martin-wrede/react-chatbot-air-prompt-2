@@ -88,6 +88,7 @@
 
   "roadmapLabels": {
     "title": "AI Coach Roadmap",
+    "title2": "Daily Task",
     "subtitle": "Your Personalized Journey to Success",
     "headerIcon": "📅",
     "exportButton": "Export to Calendar (.ics)",

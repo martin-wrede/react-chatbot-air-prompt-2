@@ -81,7 +81,7 @@ const generateGoogleCalendarUrl = (task, data, completedTasks) => {
 };
 
 // Main Roadmap Component
-export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
+export default function Roadmap({ roadmapData, onRoadmapUpdate, titleDisplay2, titleDisplay3 }) {
   const { data } = useContext(Context);
   const [completedTasks, setCompletedTasks] = useState(new Set());
   const [editingTask, setEditingTask] = useState(null); // Stores the ID of the task being edited
@@ -210,7 +210,10 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate }) {
       )}
 
       <div className="header">
-        <div className="headerTitle"><h1 className="title">{data.roadmapLabels?.title || 'Roadmap'}</h1></div>
+        <div className="headerTitle">
+          <h1 style={{display:titleDisplay3 }} className="title">{data.roadmapLabels?.title || 'Roadmap'}</h1>
+            <h1 style={{display: titleDisplay2}} className="title">{data.roadmapLabels?.title2 || 'Daily Task'}</h1>
+          </div>
         <p className="subtitle">{data.roadmapLabels?.subtitle || 'Your personalized learning roadmap'}</p>
         <div className="header-actions">
           <button onClick={addNewTask} className="addNewButton">

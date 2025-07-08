@@ -28,10 +28,12 @@ width:95%;
 top:70px;
 
 }
-/* Chat Container 
- 
- display:none;
-*/
+/*  display */
+#part2 {
+/*  display:block; */
+background-color: white;
+
+}
  
 .ics-downloads {
   margin-top: 10px;
