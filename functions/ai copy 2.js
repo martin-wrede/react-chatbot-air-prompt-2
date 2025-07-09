@@ -100,13 +100,24 @@ export async function onRequestPost(context) {
 
     // Parse the successful response from OpenAI.
     const data = await apiResponse.json();
-
+    
+    {/**
     // The Airtable logic can remain here if you are using it.
-    // try {
-    //   await saveToAirtable(env, message, data.choices?.[0]?.message?.content, files, roadmap);
-    // } catch (airtableError) {
-    //   console.error("Airtable save failed:", airtableError);
-    // }
+    try {
+      await saveToAirtable(env, message, data.choices?.[0]?.message?.content, files, roadmap);
+     } catch (airtableError) {
+      console.error("Airtable save failed:", airtableError);
+   }
+   */}
+
+    // ✅ Save to Airtable DIRECTLY (no HTTP calls)
+    try {
+      await saveToAirtable(env, message, botAnswer, files, parsedBody.fileAttachments);
+      console.log("Successfully saved to Airtable with bot answer");
+    } catch (airtableError) {
+      console.error("Airtable save failed:", airtableError);
+      // Continue with AI response even if Airtable fails
+    }
 
     // Return the successful response to the frontend.
     return new Response(JSON.stringify(data), {
@@ -131,4 +142,98 @@ export async function onRequestPost(context) {
       headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
     });
   }
+
+
+  // ✅ DIRECT Airtable Integration with File Attachments support
+async function saveToAirtable(env, originalMessage, botAnswer, files, fileAttachments = []) {
+  const AIRTABLE_API_KEY = env.AIRTABLE_API_KEY;
+  const AIRTABLE_BASE_ID = env.AIRTABLE_BASE_ID;
+  const AIRTABLE_TABLE_NAME = env.AIRTABLE_TABLE_NAME || "Prompts";
+
+  if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+    throw new Error("Missing Airtable credentials");
+  }
+
+  // Extract just the user's original prompt (without file content)
+  let userPrompt = originalMessage;
+  
+  // If message contains file context, extract only the original prompt
+  if (originalMessage.includes("[Uploaded Files Context:]")) {
+    userPrompt = originalMessage.split("\n\n[Uploaded Files Context:]")[0];
+  }
+
+  // Clean up bot answer - remove any potential formatting issues
+  const cleanBotAnswer = botAnswer.replace(/\n\s*\n/g, '\n').trim();
+
+  // Prepare file attachments for Airtable
+  let airtableAttachments = [];
+  
+  if (fileAttachments && fileAttachments.length > 0) {
+    console.log("Processing file attachments:", fileAttachments.length);
+    
+    for (const file of fileAttachments) {
+      try {
+        // Create a data URL for the file content
+        const base64Content = btoa(file.content);
+        const dataUrl = `data:${file.type || 'text/plain'};base64,${base64Content}`;
+        
+        // Airtable attachment format
+        const attachment = {
+          filename: file.name,
+          url: dataUrl
+        };
+        
+        airtableAttachments.push(attachment);
+        console.log(`Prepared attachment: ${file.name} (${file.content.length} chars)`);
+      } catch (error) {
+        console.error(`Error processing file ${file.name}:`, error);
+      }
+    }
+  }
+
+  const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+  
+  const fields = {
+    "Prompt": userPrompt,
+    "Bot_Answer": cleanBotAnswer,
+    "Timestamp": new Date().toISOString(),
+    "File_Count": files.length,
+  };
+
+  // Add file attachments if any
+  if (airtableAttachments.length > 0) {
+    fields["File_Attachments"] = airtableAttachments;
+  }
+
+  const recordData = {
+    records: [{ fields }]
+  };
+
+  console.log("Saving to Airtable:", {
+    url: airtableUrl,
+    promptLength: userPrompt.length,
+    botAnswerLength: cleanBotAnswer.length,
+    hasFiles: files.length > 0,
+    hasAttachments: airtableAttachments.length > 0
+  });
+
+  const response = await fetch(airtableUrl, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${AIRTABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(recordData),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Airtable API Error:", response.status, errorText);
+    throw new Error(`Airtable API Error: ${response.status} - ${errorText}`);
+  }
+
+  const result = await response.json();
+  console.log("Airtable save successful:", result);
+  return result;
+}
 }
