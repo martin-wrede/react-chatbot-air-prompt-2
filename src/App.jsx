@@ -23,12 +23,20 @@ function App() {
   const [gesamtPrompt, setGesamtPrompt] = useState("");
   const [roadmapData, setRoadmapData] = useState(initialRoadmapData);
   const [roadmapToday, setRoadmapToday] = useState([]);
-  
+   const [roadmapContext, setRoadmapContext] = useState('');
+
   const params = new URLSearchParams(location.search);
   const part1 = params.get('part1');
   const part2 = params.get('part2');
   const part3 = params.get('part3');
   const today = new Date().toISOString().split('T')[0];
+
+   useEffect(() => {
+    // Whenever the roadmap data changes, update the context string for the AI.
+    // We provide it in a structured, easy-to-parse format.
+    const contextString = `Current Project Plan (as JSON):\n${JSON.stringify(roadmapData, null, 2)}`;
+    setRoadmapContext(contextString);
+  }, [roadmapData]);
 
   useEffect(() => {
     const todayTasks = roadmapData.filter(item => item.date === today);
@@ -36,6 +44,7 @@ function App() {
   }, [roadmapData, today]);
 
   const handleRoadmapUpdate = (updatedData) => {
+      // This function now correctly receives all updates from RoadmapEdit
     updatedData.sort((a, b) => new Date(a.date) - new Date(b.date));
     setRoadmapData(updatedData);
   };
@@ -130,6 +139,7 @@ function App() {
           messages: conversationHistory,
           files: uploadedFiles,
           prompt: gesamtPrompt,
+           roadmap: roadmapContext,
         }),
       });
       

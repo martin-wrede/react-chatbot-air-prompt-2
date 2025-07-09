@@ -1,7 +1,7 @@
 import { onRequestOptions as __ai_js_onRequestOptions } from "D:\\Documents\\CODING\\JAVASCRIPT\\react-chatbot-air-prompt-2\\functions\\ai.js"
 import { onRequestPost as __ai_js_onRequestPost } from "D:\\Documents\\CODING\\JAVASCRIPT\\react-chatbot-air-prompt-2\\functions\\ai.js"
-import { onRequest as __ai_copy_js_onRequest } from "D:\\Documents\\CODING\\JAVASCRIPT\\react-chatbot-air-prompt-2\\functions\\ai copy.js"
-import { onRequest as __ai_de_js_onRequest } from "D:\\Documents\\CODING\\JAVASCRIPT\\react-chatbot-air-prompt-2\\functions\\ai-de.js"
+import { onRequestOptions as __ai_copy_js_onRequestOptions } from "D:\\Documents\\CODING\\JAVASCRIPT\\react-chatbot-air-prompt-2\\functions\\ai copy.js"
+import { onRequestPost as __ai_copy_js_onRequestPost } from "D:\\Documents\\CODING\\JAVASCRIPT\\react-chatbot-air-prompt-2\\functions\\ai copy.js"
 
 export const routes = [
     {
@@ -21,15 +21,15 @@ export const routes = [
   {
       routePath: "/ai copy",
       mountPath: "/",
-      method: "",
+      method: "OPTIONS",
       middlewares: [],
-      modules: [__ai_copy_js_onRequest],
+      modules: [__ai_copy_js_onRequestOptions],
     },
   {
-      routePath: "/ai-de",
+      routePath: "/ai copy",
       mountPath: "/",
-      method: "",
+      method: "POST",
       middlewares: [],
-      modules: [__ai_de_js_onRequest],
+      modules: [__ai_copy_js_onRequestPost],
     },
   ]

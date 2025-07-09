@@ -1,12 +1,13 @@
+// --- App.jsx (Corrected) ---
+
 import React, { useState, useEffect, useContext } from 'react';
 import Form from './components/Form';
 import RoadmapEdit from './components/RoadmapEdit';
-import ChatInterface from './components/ChatInterface'; // Import new component
+import ChatInterface from './components/ChatInterface';
 import { Context } from './Context';
-import * as fileUtils from './utils/fileUtils'; // Import all utils
+import * as fileUtils from './utils/fileUtils';
 import './App.css';
 
-// Sample Data can be moved outside the component or to another file
 const initialRoadmapData = [
   { date: '2025-07-08', task: 'Schreibe Value Proposition: was bekommt der Users?', dailyStartTime: '10:00', dailyHours: 6, motivation: 'Drinks mit Kollegen' },
   { date: '2025-06-18', task: 'Recherchiere 3 Landing Pages und schreib auf, was funktioniert.', dailyStartTime: '10:00', dailyHours: 6, motivation: 'Freunde anrufen' }
@@ -15,7 +16,6 @@ const initialRoadmapData = [
 function App() {
   const { data } = useContext(Context);
 
-  // State Management
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,20 +24,17 @@ function App() {
   const [roadmapData, setRoadmapData] = useState(initialRoadmapData);
   const [roadmapToday, setRoadmapToday] = useState([]);
   
-  // URL Params
   const params = new URLSearchParams(location.search);
   const part1 = params.get('part1');
   const part2 = params.get('part2');
   const part3 = params.get('part3');
   const today = new Date().toISOString().split('T')[0];
 
-  // Effects
   useEffect(() => {
     const todayTasks = roadmapData.filter(item => item.date === today);
     setRoadmapToday(todayTasks);
   }, [roadmapData, today]);
 
-  // Handlers
   const handleRoadmapUpdate = (updatedData) => {
     updatedData.sort((a, b) => new Date(a.date) - new Date(b.date));
     setRoadmapData(updatedData);
@@ -50,7 +47,6 @@ function App() {
     
     let allNewEvents = [];
     
-    // Prefer JSON over ICS
     if (jsonContents.length > 0) {
       jsonContents.forEach(json => {
         allNewEvents.push(...fileUtils.parseJsonToRoadmapData(json, defaultMotivation));
@@ -63,19 +59,19 @@ function App() {
 
     if (allNewEvents.length > 0) {
       setRoadmapData(allNewEvents);
-      // Add a system message about the import
       setTimeout(() => {
         const successMessage = (data?.chat_autoImportSuccess || 'Automatisch {count} Termine importiert!').replace('{count}', allNewEvents.length);
         setMessages(prev => [...prev, { role: 'system', content: successMessage }]);
       }, 500);
     }
 
-    // Create download links for all found content
     const icsDownloadLinks = icsContents.map((ics, i) => fileUtils.createIcsDownloadLink(ics, `kalender-${i+1}.ics`));
     const jsonDownloadLinks = jsonContents.map((json, i) => fileUtils.createJsonDownloadLink(json, `roadmap-${i+1}.json`));
     
     return {
-      originalContent: content,
+      // --- FIX: Renamed 'originalContent' to 'content' to match ChatInterface.jsx ---
+      content: content,
+      // -------------------------------------------------------------------------------
       downloadLinks: [...jsonDownloadLinks, ...icsDownloadLinks],
       importedEvents: allNewEvents.length,
     };
@@ -109,11 +105,8 @@ function App() {
         console.error('Error reading file:', error);
       }
     }
-    event.target.value = ''; // Reset file input
+    event.target.value = '';
   };
-  // start sendmessage
- 
- // --- START OF FILE App.jsx (Corrected sendMessage function) ---
 
   const sendMessage = async () => {
     if (!inputMessage.trim() && uploadedFiles.length === 0) return;
@@ -122,30 +115,25 @@ function App() {
     const messageContent = `${inputMessage}\n\n${fileContext}`.trim();
     const userMessage = { role: 'user', content: messageContent };
     
-    // The conversation history to be sent to the AI.
-    // It should be the messages state BEFORE adding the new user message.
-    // FIX: Corrected the variable name typo from "conversatsionHistory"
     const conversationHistory = [...messages]; 
 
-    // Add user message to the local state for immediate display
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
 
     try {
-      const response = await fetch('/ai', { // This URL is correct.
+      const response = await fetch('/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: messageContent,
-          messages: conversationHistory, // Now this variable exists.
+          messages: conversationHistory,
           files: uploadedFiles,
           prompt: gesamtPrompt,
         }),
       });
       
        if (!response.ok) {
-        // Now you can get more detailed error messages from the server if they happen
         const errorText = await response.text();
         throw new Error(`Server responded with ${response.status}: ${errorText}`);
       }
@@ -156,21 +144,15 @@ function App() {
       const processed = processAIResponse(aiContent);
       const assistantMessage = { role: 'assistant', ...processed };
 
-      // We already added the user's message, now we add the assistant's
       setMessages(prev => [...prev, assistantMessage]);
 
     } catch (error) {
-      // This catch block was being triggered by the ReferenceError before. Now it will only catch network/server errors.
       console.error("Error sending message:", error);
       setMessages(prev => [...prev, { role: 'assistant', content: `Fehler bei der Verarbeitung Ihrer Anfrage. Details: ${error.message}` }]);
     } finally {
       setIsLoading(false);
     }
   };
-
-// --- END OF CORRECTED FUNCTION ---
-  // end sendmessage
-
 
   const deleteFile = (fileId) => {
     setUploadedFiles(prev => prev.filter(file => file.id !== fileId));

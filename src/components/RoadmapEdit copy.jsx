@@ -102,9 +102,7 @@ export default function Roadmap({ roadmapData, onRoadmapUpdate, titleDisplay2, t
     completed: completedTasks.has(item.id),
   }));
 
-// Also, ensure the completed status is part of the initial data structure passed up.
-// Find the addNewTask function and make this small adjustment.
-const addNewTask = () => {
+  const addNewTask = () => {
     const newId = `task-${Date.now()}`;
     const newTask = {
       id: newId,
@@ -113,16 +111,14 @@ const addNewTask = () => {
       dailyHours: 1,
       task: '',
       motivation: '',
-      completed: false, // Explicitly add the completed property
     };
-    // The rest of the function remains the same...
     const updatedTasks = [...localTasks, newTask].sort((a, b) => new Date(a.date) - new Date(b.date));
     setLocalTasks(updatedTasks);
     if (onRoadmapUpdate) onRoadmapUpdate(updatedTasks);
-    startEditing(newTask);
-};
+    startEditing(newTask); // Automatically enter edit mode
+  };
 
-  const toggleTaskComplete2 = (id) => {
+  const toggleTaskComplete = (id) => {
     const newCompleted = new Set(completedTasks);
     newCompleted.has(id) ? newCompleted.delete(id) : newCompleted.add(id);
     setCompletedTasks(newCompleted);
@@ -139,44 +135,20 @@ const addNewTask = () => {
     });
   };
 
-  // Find this existing function
-const toggleTaskComplete = (id) => {
-    const newCompleted = new Set(completedTasks);
-    newCompleted.has(id) ? newCompleted.delete(id) : newCompleted.add(id);
-    setCompletedTasks(newCompleted);
-    
-    // --- ADD THIS LOGIC ---
-    // After updating the local 'completed' set, we must inform the parent.
-    // We construct the full, updated data array and send it up.
-    if (onRoadmapUpdate) {
-      const updatedTasks = localTasks.map(task => ({
-        ...task,
-        completed: newCompleted.has(task.id), // Use the newly updated set
-      }));
-      onRoadmapUpdate(updatedTasks);
-    }
-    // --- END OF ADDED LOGIC ---
-};
-
   const cancelEditing = () => {
     setEditingTask(null);
     setEditedData({});
   };
 
-// Lastly, let's ensure the `completed` flag is always included when saving.
-// Find the saveTask function.
-const saveTask = (idToSave) => {
+  const saveTask = (idToSave) => {
     const updatedTasks = localTasks.map(task =>
-      task.id === idToSave 
-        ? { ...task, ...editedData, completed: completedTasks.has(idToSave) } // Ensure completed status is preserved
-        : task
+      task.id === idToSave ? { ...task, ...editedData } : task
     ).sort((a, b) => new Date(a.date) - new Date(b.date));
     setLocalTasks(updatedTasks);
     if (onRoadmapUpdate) onRoadmapUpdate(updatedTasks);
     setEditingTask(null);
     setEditedData({});
   };
-
 
   const showDeleteConfirmation = (task) => setConfirmationDialog({ task });
   const cancelDelete = () => setConfirmationDialog(null);
