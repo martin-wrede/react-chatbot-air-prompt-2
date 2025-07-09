@@ -113,6 +113,8 @@ function App() {
   };
   // start sendmessage
  
+ // --- START OF FILE App.jsx (Corrected sendMessage function) ---
+
   const sendMessage = async () => {
     if (!inputMessage.trim() && uploadedFiles.length === 0) return;
 
@@ -122,8 +124,8 @@ function App() {
     
     // The conversation history to be sent to the AI.
     // It should be the messages state BEFORE adding the new user message.
-    // THIS LINE WAS MISSING.
-    const conversatsionHistory = [...messages]; 
+    // FIX: Corrected the variable name typo from "conversatsionHistory"
+    const conversationHistory = [...messages]; 
 
     // Add user message to the local state for immediate display
     setMessages(prev => [...prev, userMessage]);
@@ -143,7 +145,9 @@ function App() {
       });
       
        if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+        // Now you can get more detailed error messages from the server if they happen
+        const errorText = await response.text();
+        throw new Error(`Server responded with ${response.status}: ${errorText}`);
       }
 
       const responseData = await response.json();
@@ -156,13 +160,15 @@ function App() {
       setMessages(prev => [...prev, assistantMessage]);
 
     } catch (error) {
+      // This catch block was being triggered by the ReferenceError before. Now it will only catch network/server errors.
       console.error("Error sending message:", error);
-      // If you open the browser console (F12), you would see the ReferenceError here.
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Fehler bei der Verarbeitung Ihrer Anfrage.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: `Fehler bei der Verarbeitung Ihrer Anfrage. Details: ${error.message}` }]);
     } finally {
       setIsLoading(false);
     }
   };
+
+// --- END OF CORRECTED FUNCTION ---
   // end sendmessage
 
 
