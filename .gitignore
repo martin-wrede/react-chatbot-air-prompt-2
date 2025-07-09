@@ -24,6 +24,8 @@ dist/
 *.sln
 *.sw?
 
+.wrangler/tmp/
+
 .env
 *.env
 .toml
