@@ -199,7 +199,7 @@ function App() {
           <RoadmapEdit titleDisplay2='block' titleDisplay3='none' roadmapData={roadmapToday} isToday={true} />
         ) : (
           <div className="info-box">
-            {(data?.chat_noTasksToday || 'Keine Aufgaben für heute! ({today})').replace('{today}', today)}
+            {(data?.chat_noTasksToday || 'No Tasks for today! ({today})').replace('{today}', today)}
           </div>
         )}
       </div>

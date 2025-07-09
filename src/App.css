@@ -1,3 +1,10 @@
+html, body {
+  margin: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+
 /* App Container */
 .app-container {
   padding: 2rem;
