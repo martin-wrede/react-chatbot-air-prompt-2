@@ -1,7 +1,7 @@
 // --- App.jsx (Corrected) ---
 
 import React, { useState, useEffect, useContext } from 'react';
-import { useLayoutEffect } from 'react';
+ 
 import Form from './components/Form';
 import RoadmapEdit from './components/RoadmapEdit';
 import ChatInterface from './components/ChatInterface';
@@ -34,26 +34,6 @@ function App() {
   const part4 = params.get('part4');
   
   const today = new Date().toISOString().split('T')[0];
-
-    // sendHeight() liest die Scroll‑Height und sendet sie an window.parent
-  const sendHeight = () => {
-    const height = document.documentElement.scrollHeight;
-    window.parent.postMessage(
-      { type: 'setHeight', height },
-      '*' // wenn du die Domain kennst, besser statt '*' einsetzen
-    );
-  };
-  useLayoutEffect(() => {
-    // Initiale Höhe melden
-    sendHeight();
-
-    // Und bei jedem Resize des Fensters oder Inhalts neu melden
-    window.addEventListener('resize', sendHeight);
-
-    // Wenn du dynamischen Content lädst (z.B. Chat-Nachricht reinkommt),
-    // call sendHeight() noch mal nach dem DOM‑Update.
-    return () => window.removeEventListener('resize', sendHeight);
-  }, []);
 
   
 
