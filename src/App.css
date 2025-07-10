@@ -1,8 +1,8 @@
 html, body {
   margin: 0;
   overflow:scroll;
-  min-height: 100%; 
-  height:2000px;
+  height: 100%; 
+ /* height:2000px; */
   background-color: grey;
 }
 
