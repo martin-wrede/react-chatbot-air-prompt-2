@@ -4,6 +4,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import Form from './components/Form';
 import RoadmapEdit from './components/RoadmapEdit';
 import ChatInterface from './components/ChatInterface';
+import TimelineGantt from './components/TimelineGantt';
 import { Context } from './Context';
 import * as fileUtils from './utils/fileUtils';
 import './App.css';
@@ -29,6 +30,8 @@ function App() {
   const part1 = params.get('part1');
   const part2 = params.get('part2');
   const part3 = params.get('part3');
+  const part4 = params.get('part4');
+  
   const today = new Date().toISOString().split('T')[0];
 
    useEffect(() => {
@@ -218,6 +221,16 @@ function App() {
           titleDisplay3='block'
         />
       </div>
+     
+
+{/* 
+<div id="part4" style={{ display: "block" }}>
+  <TimelineGantt 
+    roadmapData={roadmapData} 
+    onTaskUpdate={handleRoadmapUpdate} 
+  />
+</div>
+*/}
     </div>
   );
 }
